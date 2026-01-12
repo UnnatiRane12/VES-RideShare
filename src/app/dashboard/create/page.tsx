@@ -10,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useFirestore, useUser } from "@/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -63,20 +63,12 @@ export default function CreateRoomPage() {
     }
 
     try {
-      const docRef = await addDoc(collection(firestore, "sharingRooms"), {
-        ...data,
-        id: '', // Will be replaced by the actual doc ID below
-        ownerId: user.uid,
-        ownerName: user.displayName,
-        ownerAvatarUrl: user.photoURL || null,
-        participantIds: [],
-        createdAt: serverTimestamp(),
-      });
+      // Generate a new document reference with a unique ID
+      const newRoomRef = doc(collection(firestore, "sharingRooms"));
       
-      // Now update the document with its own ID
-      await addDoc(collection(firestore, "sharingRooms"), {
+      await setDoc(newRoomRef, {
         ...data,
-        id: docRef.id,
+        id: newRoomRef.id,
         ownerId: user.uid,
         ownerName: user.displayName,
         ownerAvatarUrl: user.photoURL || null,
@@ -286,5 +278,3 @@ export default function CreateRoomPage() {
     </div>
   );
 }
-
-    

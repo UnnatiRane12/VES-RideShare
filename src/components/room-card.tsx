@@ -8,20 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Timestamp } from "firebase/firestore";
 
 type Room = {
   id: string;
-  roomName: string;
+  name: string;
   ownerId: string;
   ownerName: string;
   ownerAvatarUrl?: string;
   participantIds: string[];
-  startPoint: string;
+  startingPoint: string;
   destination: string;
   passengerLimit: number;
   autoStatus: boolean;
-  expirationTime: Timestamp;
 };
 
 interface RoomCardProps {
@@ -43,19 +41,19 @@ function RoomOwner({ ownerName, ownerAvatarUrl }: { ownerName: string; ownerAvat
 }
 
 export function RoomCard({ room }: RoomCardProps) {
-  const totalParticipants = room.participantIds.length + 1; // +1 for the owner
+  const totalParticipants = room.participantIds.length;
 
   return (
-    <Card className="flex flex-col transition-shadow duration-300 hover:shadow-lg">
+    <Card className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className="truncate">{room.roomName}</span>
+          <span className="truncate">{room.name}</span>
           {room.autoStatus && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge variant="secondary" className="bg-accent/20 text-accent-foreground">
-                    <Car className="mr-1 h-4 w-4 text-accent" /> Auto Ready
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                    <Car className="mr-1 h-4 w-4" /> Ready
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -65,9 +63,9 @@ export function RoomCard({ room }: RoomCardProps) {
             </TooltipProvider>
           )}
         </CardTitle>
-        <CardDescription className="flex items-center gap-2">
+        <CardDescription className="flex items-center gap-2 pt-1">
             <MapPin className="h-4 w-4 text-muted-foreground"/> 
-            <span>{room.startPoint} to {room.destination}</span>
+            <span>{room.startingPoint} to {room.destination}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">

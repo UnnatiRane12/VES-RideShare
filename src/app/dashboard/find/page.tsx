@@ -12,7 +12,6 @@ import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Timestamp } from "firebase/firestore";
 
 type Room = {
   id: string;
@@ -57,8 +56,8 @@ export default function FindRoomPage() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-1">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="lg:col-span-1 space-y-6">
         <Card className="shadow-lg sticky top-20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
@@ -93,7 +92,7 @@ export default function FindRoomPage() {
           </CardContent>
         </Card>
         
-        <Alert className="mt-6 bg-primary/5 border-primary/20">
+        <Alert className="bg-primary/5 border-primary/20">
           <Sparkles className="h-4 w-4 text-primary" />
           <AlertTitle className="font-bold text-primary">Smart Suggestions</AlertTitle>
           <AlertDescription>
@@ -102,23 +101,22 @@ export default function FindRoomPage() {
         </Alert>
 
       </div>
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-3">
         <h2 className="text-3xl font-bold tracking-tight mb-4">Available Rooms</h2>
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Skeleton className="h-52 rounded-lg" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Skeleton className="h-52 rounded-lg" />
             <Skeleton className="h-52 rounded-lg" />
             <Skeleton className="h-52 rounded-lg" />
           </div>
         ) : availableRooms && availableRooms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {availableRooms.map((room) => (
               <RoomCard key={room.id} room={room} />
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg min-h-[400px] bg-gray-50">
+          <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg min-h-[400px] bg-gray-50/50">
             <Lightbulb className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold">No Rooms Found</h3>
             <p className="text-muted-foreground mt-2 max-w-sm">
@@ -133,5 +131,3 @@ export default function FindRoomPage() {
     </div>
   );
 }
-
-    
