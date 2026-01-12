@@ -49,12 +49,12 @@ export default function AuthPage() {
     }
 
 
-    router.push(`/dashboard?name=${encodeURIComponent(name)}`);
+    router.push(`/dashboard?name=${encodeURIComponent(name)}&email=${encodeURIComponent(vesId)}`);
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="mx-auto w-full max-w-sm">
+      <Card className="mx-auto w-full max-w-sm border-0 bg-card">
         <CardHeader>
           <div className="flex justify-center mb-4">
             <div className="bg-primary text-primary-foreground p-3 rounded-full">

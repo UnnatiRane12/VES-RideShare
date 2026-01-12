@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,13 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 export function UserNav() {
   const searchParams = useSearchParams();
-  const name = searchParams.get('name') || 'Jane Doe';
-  const email = searchParams.get('email') || '2021.johndoe@ves.ac.in';
+  const name = searchParams.get('name') || 'User';
+  const email = searchParams.get('email') || 'user@ves.ac.in';
   const fallback = name.split(' ').map(n => n[0]).join('');
 
   return (
@@ -25,8 +26,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={`https://picsum.photos/seed/${name}/40/40`} alt={name} />
-            <AvatarFallback>{fallback}</AvatarFallback>
+             <AvatarFallback>{fallback}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -42,6 +42,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
+            <UserIcon className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem>
