@@ -81,11 +81,12 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
+  const { id } = params;
   
   const roomDocRef = useMemoFirebase(() => {
-    if (!firestore || !params.id) return null;
-    return doc(firestore, 'sharingRooms', params.id);
-  }, [firestore, params.id]);
+    if (!firestore || !id) return null;
+    return doc(firestore, 'sharingRooms', id);
+  }, [firestore, id]);
 
   const { data: room, isLoading, error } = useDoc<Room>(roomDocRef);
 
@@ -226,5 +227,3 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
-
-    
