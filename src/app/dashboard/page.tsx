@@ -1,17 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { MapPinPlus, Search, Car, Leaf, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Dashboard() {
+  const searchParams = useSearchParams();
+  const name = searchParams.get('name') || 'Jane';
+
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome, Jane!</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome, {name}!</h1>
         <p className="text-muted-foreground">Ready to share a ride? Get started below.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Link href="/dashboard/create">
+        <Link href={{ pathname: "/dashboard/create", query: { name } }}>
           <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Create a Ride</CardTitle>
@@ -24,7 +30,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/dashboard/find">
+        <Link href={{ pathname: "/dashboard/find", query: { name } }}>
           <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Find a Ride</CardTitle>
