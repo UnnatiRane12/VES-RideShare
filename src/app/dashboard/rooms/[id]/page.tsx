@@ -1,7 +1,6 @@
 
 'use client';
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Car, Clock, Edit, MapPin, Users, CheckCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +15,7 @@ import { useFirestore, useDoc, useMemoFirebase, useUser } from "@/firebase";
 import { doc, updateDoc, arrayUnion, arrayRemove, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { GoogleMap } from "@/components/google-map";
 
 type Room = {
   id: string;
@@ -113,8 +113,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
   const allRiderIds = [ownerId, ...participants];
   const currentCapacity = allRiderIds.length;
   const isFull = currentCapacity >= room.passengerLimit;
-  const mapPlaceholder = PlaceHolderImages.find(img => img.id === 'map-placeholder');
-
+  
   const timeRemaining = room.expirationTime.toMillis() - Date.now();
   const minutesRemaining = Math.max(0, Math.round(timeRemaining / 60000));
   
@@ -157,17 +156,9 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
             <Card className="overflow-hidden">
-                {mapPlaceholder && (
                 <div className="relative h-64 w-full md:h-96">
-                    <Image
-                    src={mapPlaceholder.imageUrl}
-                    alt="Map placeholder"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    data-ai-hint={mapPlaceholder.imageHint}
-                    />
+                   <GoogleMap startPoint={room.startPoint} destination={room.destination} />
                 </div>
-                )}
             </Card>
         </div>
         <div className="lg:col-span-1 flex flex-col gap-6">

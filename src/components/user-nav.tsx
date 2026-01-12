@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,7 +47,7 @@ export function UserNav() {
     return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
   }
   
-  const name = userProfile ? `${userProfile.firstName} ${userProfile.lastName}`.trim() : user?.displayName || 'User';
+  const name = user?.displayName || (userProfile ? `${userProfile.firstName} ${userProfile.lastName}`.trim() : 'User');
   const email = user?.email || 'user@ves.ac.in';
   const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
@@ -57,6 +57,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
+             <AvatarImage src={user?.photoURL || undefined} alt={name} />
              <AvatarFallback>{fallback}</AvatarFallback>
           </Avatar>
         </Button>
