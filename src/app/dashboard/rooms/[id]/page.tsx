@@ -16,6 +16,7 @@ import { doc, updateDoc, arrayUnion, arrayRemove, Timestamp } from "firebase/fir
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { GoogleMap } from "@/components/google-map";
+import React from "react";
 
 type Room = {
   id: string;
@@ -81,7 +82,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const { id } = params;
+  const { id } = React.use(params);
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
