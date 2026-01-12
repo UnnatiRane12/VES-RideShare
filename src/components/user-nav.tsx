@@ -14,14 +14,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User as UserIcon, LogOut, Settings, History } from "lucide-react";
 import Link from "next/link";
-import { useUser, useAuth } from "@/firebase";
+import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { doc } from "firebase/firestore";
 
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+};
 
 export function UserNav() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -30,11 +36,18 @@ export function UserNav() {
     });
   };
 
-  if (isUserLoading) {
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
+  if (isUserLoading || isProfileLoading) {
     return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
   }
-
-  const name = user?.displayName || 'User';
+  
+  const name = userProfile ? `${userProfile.firstName} ${userProfile.lastName}`.trim() : user?.displayName || 'User';
   const email = user?.email || 'user@ves.ac.in';
   const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 

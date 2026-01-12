@@ -2,31 +2,54 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { MapPinPlus, Search, Car, Leaf, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { doc } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+};
 
 export default function Dashboard() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const firestore = useFirestore();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/');
     }
   }, [user, isUserLoading, router]);
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
   
-  if (isUserLoading || !user) {
+  if (isUserLoading || isProfileLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+      <div className="flex flex-col gap-8">
+        <div>
+          <Skeleton className="h-9 w-64 mb-2" />
+          <Skeleton className="h-6 w-80" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-36" />
+            <Skeleton className="h-36" />
+        </div>
+         <Skeleton className="h-64" />
       </div>
     );
   }
 
-  const name = user?.displayName || 'User';
+  const name = userProfile ? `${userProfile.firstName} ${userProfile.lastName}`.trim() : user?.displayName || 'User';
 
   return (
     <div className="flex flex-col gap-8">
