@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -9,140 +8,87 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user.",
-          "format": "uuid"
+          "description": "Unique identifier for the user."
+        },
+        "vesId": {
+          "type": "string",
+          "description": "VES (institute) ID of the user."
         },
         "email": {
           "type": "string",
-          "description": "The user's email address.",
+          "description": "Email address of the user.",
           "format": "email"
         },
-        "firstName": {
+        "name": {
           "type": "string",
-          "description": "The user's first name."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "The user's last name."
-        },
-        "college": {
-          "type": "string",
-          "description": "The user's college."
+          "description": "Full name of the user."
         }
       },
       "required": [
         "id",
-        "email",
-        "firstName",
-        "lastName"
+        "vesId"
       ]
     },
-    "RideSharingRoom": {
+    "SharingRoom": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "RideSharingRoom",
+      "title": "SharingRoom",
       "type": "object",
-      "description": "Represents a ride sharing room created by a user.",
+      "description": "Represents a ride-sharing room created by a user.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the ride sharing room.",
-          "format": "uuid"
+          "description": "Unique identifier for the sharing room."
         },
         "ownerId": {
           "type": "string",
-          "description": "Reference to the User who created the room. (Relationship: User 1:N RideSharingRoom)"
+          "description": "Reference to the User who created the room. (Relationship: User 1:N SharingRoom)"
         },
-        "roomName": {
+        "name": {
           "type": "string",
-          "description": "The name of the ride sharing room."
+          "description": "Name of the sharing room."
         },
         "autoStatus": {
           "type": "boolean",
-          "description": "Indicates whether the ride has an auto secured."
+          "description": "Indicates whether the auto (vehicle) has been found for the sharing."
         },
         "destination": {
           "type": "string",
-          "description": "The destination for the ride sharing room."
+          "description": "The destination for the ride sharing."
         },
         "startingPoint": {
           "type": "string",
-          "description": "The starting point for the ride sharing room."
+          "description": "The starting point for the ride sharing."
         },
         "expirationTime": {
           "type": "string",
-          "description": "The expiration date and time for the ride sharing room.",
+          "description": "The date and time when the sharing room expires.",
           "format": "date-time"
         },
         "participantIds": {
           "type": "array",
-          "description": "References to Users who are participating in the ride sharing room. (Relationship: User N:N RideSharingRoom)",
+          "description": "References to Users who are participating in the room. (Relationship: User N:N SharingRoom)",
           "items": {
             "type": "string"
           }
         },
         "passengerLimit": {
           "type": "number",
-          "description": "The maximum number of participants allowed in the ride sharing room."
+          "description": "Maximum number of allowed passengers."
         }
       },
       "required": [
         "id",
         "ownerId",
-        "roomName",
-        "autoStatus",
         "destination",
         "startingPoint",
-        "expirationTime",
-        "passengerLimit"
-      ]
-    },
-    "RideHistory": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "RideHistory",
-      "type": "object",
-      "description": "Represents the ride history of a user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the ride history entry.",
-          "format": "uuid"
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the User. (Relationship: User 1:N RideHistory)"
-        },
-        "rideSharingRoomId": {
-          "type": "string",
-          "description": "Reference to the RideSharingRoom. (Relationship: RideSharingRoom 1:N RideHistory)"
-        },
-        "rideDate": {
-          "type": "string",
-          "description": "The date and time the ride occurred.",
-          "format": "date-time"
-        },
-        "destination": {
-          "type": "string",
-          "description": "The destination of the ride."
-        },
-        "startingPoint": {
-          "type": "string",
-          "description": "The starting point of the ride."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "rideSharingRoomId",
-        "rideDate",
-        "destination",
-        "startingPoint"
+        "expirationTime"
       ]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "google.com"
+      "anonymous"
     ]
   },
   "firestore": {
@@ -154,52 +100,32 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles.  Authentication is handled by Firebase Auth; this collection stores additional profile information.",
+          "description": "Stores user profiles. Access is restricted to the authenticated user (path-based ownership).",
           "params": [
             {
               "name": "userId",
-              "description": "The unique ID of the user, corresponding to the Firebase Auth UID."
+              "description": "The unique identifier of the user."
             }
           ]
         }
       },
       {
-        "path": "/rideSharingRooms/{rideSharingRoomId}",
+        "path": "/sharingRooms/{sharingRoomId}",
         "definition": {
-          "entityName": "RideSharingRoom",
+          "entityName": "SharingRoom",
           "schema": {
-            "$ref": "#/backend/entities/RideSharingRoom"
+            "$ref": "#/backend/entities/SharingRoom"
           },
-          "description": "Stores ride sharing room information. Includes denormalized 'ownerId' for authorization independence.",
+          "description": "Stores ride-sharing room information. Includes denormalized 'ownerId' for authorization independence.",
           "params": [
             {
-              "name": "rideSharingRoomId",
-              "description": "The unique ID of the ride sharing room."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/rideHistory/{rideHistoryId}",
-        "definition": {
-          "entityName": "RideHistory",
-          "schema": {
-            "$ref": "#/backend/entities/RideHistory"
-          },
-          "description": "Stores ride history for each user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique ID of the user."
-            },
-            {
-              "name": "rideHistoryId",
-              "description": "The unique ID of the ride history entry."
+              "name": "sharingRoomId",
+              "description": "The unique identifier of the sharing room."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability, aligning with the core design principles. User data is stored in a dedicated collection, while RideSharingRooms are stored in a separate collection, with the `ownerId` clearly indicating ownership. RideHistory is stored as a subcollection under each user, enabling efficient querying of a user's ride history. \n\n**Authorization Independence:** The structure denormalizes the necessary authorization context. For example, the `RideSharingRoom` stores the `ownerId`. This eliminates the need for `get()` calls in security rules to check the owner, enabling atomic operations.\n\n**QAPs Support:**\n*   **List Operations:** Segregation of data into separate collections (`users`, `rideSharingRooms`, and `rideHistory`) allows for secure and efficient list operations (QAPs). Rules can be written to allow listing of rooms based on specific criteria without exposing sensitive data.\n*   **Ownership:** Path-based ownership is used for `RideHistory` enabling simple and secure ownership-based rules."
+    "reasoning": "The Firestore structure is designed to support the VES RideShare application, focusing on user authentication, sharing room management, and smart matching of users for ride-sharing. Authorization Independence is achieved by storing the `ownerId` within each `SharingRoom` document. This avoids the need for `get()` calls in security rules to verify ownership, enabling atomic operations. Structural Segregation is applied by storing user data in a private collection (`/users/{userId}`), while sharing rooms are stored in a separate collection (`/sharingRooms/{sharingRoomId}`), allowing for distinct security rules for each.\n\nThe structure supports required QAPs (Queries and Permissions) as follows:\n\n*   **List Sharing Rooms:** Listing is supported on the `/sharingRooms` collection.\n*   **Authorization:** Access to a sharing room will be granted to any authenticated user.\n*   **User Data Privacy:**  User documents are private, accessible only to the authenticated user."
   }
 }
