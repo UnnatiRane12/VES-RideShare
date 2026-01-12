@@ -11,13 +11,85 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth, useFirestore, useUser } from "@/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+
+const formSchema = z.object({
+  roomName: z.string().min(1, "Room name is required."),
+  startPoint: z.string().min(1, "Starting point is required."),
+  destination: z.string().min(1, "Destination is required."),
+  passengerLimit: z.coerce.number().min(2).max(4),
+  expirationTime: z.string().min(1, "Expiration time is required."),
+  autoStatus: z.boolean().default(false),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function CreateRoomPage() {
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
+  
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      roomName: "",
+      startPoint: "",
+      destination: "",
+      passengerLimit: 3,
+      expirationTime: "30",
+      autoStatus: false,
+    },
+  });
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const onSubmit = async (data: FormData) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Not Authenticated",
+        description: "You must be logged in to create a room.",
+      });
+      return;
+    }
+
+    try {
+      const expirationDate = new Date(Date.now() + parseInt(data.expirationTime) * 60000);
+
+      await addDoc(collection(firestore, "rideSharingRooms"), {
+        ...data,
+        ownerId: user.uid,
+        participantIds: [],
+        createdAt: serverTimestamp(),
+        expirationTime: expirationDate,
+      });
+
+      toast({
+        title: "Room Created!",
+        description: `Your room "${data.roomName}" has been successfully created.`,
+      });
+      router.push("/dashboard");
+
+    } catch (error) {
+      console.error("Error creating room:", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem creating your room. Please try again.",
+      });
+    }
+  };
   
   if (!isClient) {
      return (
@@ -79,64 +151,126 @@ export default function CreateRoomPage() {
           <CardDescription>Fill out the details below to open your ride for sharing.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="room-name">Room Name</Label>
-              <Input id="room-name" placeholder="e.g., Morning Ride to College" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="start-point">Starting Point</Label>
-                <Input id="start-point" placeholder="e.g., Chembur Station" />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
+              <FormField
+                control={form.control}
+                name="roomName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Room Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Morning Ride to College" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startPoint"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Starting Point</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Chembur Station" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="destination"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Destination</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., VESIT" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="destination">Destination</Label>
-                <Input id="destination" placeholder="e.g., VESIT" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="passengerLimit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passenger Limit</FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select number of seats" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="2">2 People</SelectItem>
+                          <SelectItem value="3">3 People</SelectItem>
+                          <SelectItem value="4">4 People</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="expirationTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Room Expiration</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Set expiration time" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="15">in 15 minutes</SelectItem>
+                          <SelectItem value="30">in 30 minutes</SelectItem>
+                          <SelectItem value="60">in 1 hour</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="grid gap-2">
-                <Label htmlFor="capacity">Passenger Limit</Label>
-                <Select>
-                  <SelectTrigger id="capacity">
-                    <SelectValue placeholder="Select number of seats" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2">2 People</SelectItem>
-                    <SelectItem value="3">3 People</SelectItem>
-                    <SelectItem value="4">4 People</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="expiration">Room Expiration</Label>
-                <Select>
-                  <SelectTrigger id="expiration">
-                    <SelectValue placeholder="Set expiration time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">in 15 minutes</SelectItem>
-                    <SelectItem value="30">in 30 minutes</SelectItem>
-                    <SelectItem value="60">in 1 hour</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch id="auto-status" />
-              <Label htmlFor="auto-status">I have already found an auto</Label>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" asChild>
-                    <Link href="/dashboard">Cancel</Link>
+              <FormField
+                control={form.control}
+                name="autoStatus"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>Auto Secured?</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" asChild type="button">
+                  <Link href="/dashboard">Cancel</Link>
                 </Button>
-                <Button>
-                    Create Room
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? "Creating..." : "Create Room"}
                 </Button>
-            </div>
-          </form>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+    
