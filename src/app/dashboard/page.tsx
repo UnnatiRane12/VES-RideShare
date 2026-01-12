@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -25,7 +26,7 @@ export default function Dashboard() {
     );
   }
 
-  const name = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'User';
+  const name = user?.displayName || user?.email?.split('@')[0] || 'User';
 
   return (
     <div className="flex flex-col gap-8">

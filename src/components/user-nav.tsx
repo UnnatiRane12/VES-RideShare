@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User as UserIcon } from "lucide-react";
+import { User as UserIcon, LogOut, Settings, History } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -59,18 +60,23 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <UserIcon className="mr-2 h-4 w-4" />
+            <UserIcon className="mr-2" />
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/my-rides">My Rides</Link>
+            <Link href="/dashboard/my-rides" className="flex items-center w-full">
+              <History className="mr-2" />
+              My Rides
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
+            <Settings className="mr-2" />
             Settings
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
+          <LogOut className="mr-2" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

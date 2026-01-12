@@ -11,11 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useUser } from "@/firebase";
-import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
 import { doc, setDoc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
-import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 
 export default function AuthPage() {
@@ -70,6 +68,9 @@ export default function AuthPage() {
           const newUser = userCredential.user;
 
           if (newUser) {
+            // Update Firebase Auth profile
+            await updateProfile(newUser, { displayName: fullName });
+
             const userRef = doc(firestore, "users", newUser.uid);
             const [firstName, lastName] = fullName.split(' ');
             const userData = {
@@ -80,9 +81,11 @@ export default function AuthPage() {
               lastName: lastName || '',
               college: college,
             };
-            // Use setDoc directly here since we need to ensure it completes
-            // before navigating. non-blocking is not suitable here.
+            // Use setDoc to save user data to Firestore
             await setDoc(userRef, userData, { merge: true });
+
+            // Manually reload the user to get the updated displayName
+            await newUser.reload();
             router.push('/dashboard');
           }
 
