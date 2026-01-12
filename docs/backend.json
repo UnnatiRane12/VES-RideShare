@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -88,8 +89,7 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous",
-      "google"
+      "anonymous"
     ]
   },
   "firestore": {
