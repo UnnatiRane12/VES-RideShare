@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, useUser } from "@/firebase";
+import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
+import { doc } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
+import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,6 +24,15 @@ export default function AuthPage() {
   const [college, setCollege] = useState("");
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
 
   const handleAuthAction = () => {
     const vesIdRegex = /^[a-zA-Z0-9.]+@ves\.ac\.in$/;
@@ -29,28 +44,70 @@ export default function AuthPage() {
       });
       return;
     }
-
-    if (!isLogin && (!fullName || !college)) {
+    
+    if (password.length < 6) {
         toast({
             variant: "destructive",
-            title: "Missing Information",
-            description: "Please fill out all fields for sign up.",
+            title: "Password too short",
+            description: "Your password must be at least 6 characters long.",
         });
         return;
     }
 
-    let name = "User";
-    if (!isLogin) {
-        name = fullName.split(' ')[0];
-    } else {
-        const idPart = vesId.split('@')[0];
-        const namePart = idPart.split('.')[1] || idPart;
-        name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    if (!isLogin) { // Sign Up
+        if (!fullName || !college) {
+            toast({
+                variant: "destructive",
+                title: "Missing Information",
+                description: "Please fill out all fields for sign up.",
+            });
+            return;
+        }
+        initiateEmailSignUp(auth, vesId, password);
+        // We need to listen for auth state change to get the new user's UID
+        const unsubscribe = auth.onAuthStateChanged(newUser => {
+          if (newUser) {
+            const userRef = doc(firestore, "users", newUser.uid);
+            const [firstName, lastName] = fullName.split(' ');
+            const userData = {
+              id: newUser.uid,
+              vesId: vesId,
+              email: vesId,
+              firstName: firstName || '',
+              lastName: lastName || '',
+              college: college,
+            };
+            setDocumentNonBlocking(userRef, userData, { merge: true });
+            unsubscribe();
+          }
+        });
+
+    } else { // Login
+        initiateEmailSignIn(auth, vesId, password);
     }
 
-
-    router.push(`/dashboard?name=${encodeURIComponent(name)}&email=${encodeURIComponent(vesId)}`);
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            router.push('/dashboard');
+        }
+    }, error => {
+         toast({
+            variant: "destructive",
+            title: "Authentication Failed",
+            description: error.message || "Please check your credentials and try again.",
+        });
+    });
   };
+  
+    if (isUserLoading || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        {/* You can replace this with a proper loader component */}
+        <p>Loading...</p> 
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">

@@ -13,13 +13,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User as UserIcon } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useUser, useAuth } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+
 
 export function UserNav() {
-  const searchParams = useSearchParams();
-  const name = searchParams.get('name') || 'User';
-  const email = searchParams.get('email') || 'user@ves.ac.in';
-  const fallback = name.split(' ').map(n => n[0]).join('');
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    signOut(auth).then(() => {
+      router.push('/');
+    });
+  };
+
+  if (isUserLoading) {
+    return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
+  }
+
+  const name = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const email = user?.email || 'user@ves.ac.in';
+  const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase();
+
 
   return (
     <DropdownMenu>
@@ -45,16 +62,16 @@ export function UserNav() {
             <UserIcon className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            My Rides
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/my-rides">My Rides</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             Settings
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/">Log out</Link>
+        <DropdownMenuItem onClick={handleLogout}>
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

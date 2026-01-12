@@ -1,13 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useUser } from "@/firebase";
 import { MapPinPlus, Search, Car, Leaf, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Dashboard() {
-  const searchParams = useSearchParams();
-  const name = searchParams.get('name') || 'Jane';
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/');
+    }
+  }, [user, isUserLoading, router]);
+  
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  const name = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'User';
 
   return (
     <div className="flex flex-col gap-8">
@@ -17,7 +35,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Link href={{ pathname: "/dashboard/create", query: { name } }}>
+        <Link href="/dashboard/create">
           <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Create a Ride</CardTitle>
@@ -30,7 +48,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={{ pathname: "/dashboard/find", query: { name } }}>
+        <Link href="/dashboard/find">
           <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Find a Ride</CardTitle>

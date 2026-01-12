@@ -71,8 +71,8 @@ export default function CreateRoomPage() {
                 <Button variant="outline" asChild>
                     <Link href="/dashboard">Cancel</Link>
                 </Button>
-                <Button asChild>
-                    <Link href="/dashboard/find">Create Room</Link>
+                <Button>
+                    Create Room
                 </Button>
             </div>
           </form>
