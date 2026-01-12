@@ -126,8 +126,7 @@ export default function AuthPage() {
   
     if (isUserLoading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        {/* You can replace this with a proper loader component */}
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <p>Loading...</p> 
       </div>
     );
@@ -135,17 +134,17 @@ export default function AuthPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="mx-auto w-full max-w-sm border-0 bg-card">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
+      <Card className="mx-auto w-full max-w-sm shadow-2xl">
         <CardHeader>
           <div className="flex justify-center mb-4">
             <div className="bg-primary text-primary-foreground p-3 rounded-full">
               <Car className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">VES RideShare</CardTitle>
-          <CardDescription className="text-center">
-            {isLogin ? "Log in to your account" : "Create an account to start sharing rides"}
+          <CardTitle className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-500">VES RideShare</CardTitle>
+          <CardDescription className="text-center text-muted-foreground">
+            {isLogin ? "Welcome back! Please log in." : "Join our community of student commuters."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -196,7 +195,7 @@ export default function AuthPage() {
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input 
-                id="password" 
+                id="password" ope
                 type="password" 
                 required 
                 value={password}
@@ -205,12 +204,12 @@ export default function AuthPage() {
             </div>
             
             <Button className="w-full" onClick={handleAuthAction}>
-              {isLogin ? "Login" : "Sign Up"}
+              {isLogin ? "Login" : "Create Account"}
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <Button variant="link" className="p-0 h-auto" onClick={() => setIsLogin(!isLogin)}>
+            <Button variant="link" className="p-0 h-auto font-semibold" onClick={() => setIsLogin(!isLogin)}>
               {isLogin ? "Sign Up" : "Login"}
             </Button>
           </div>
@@ -219,4 +218,3 @@ export default function AuthPage() {
     </div>
   );
 }
-

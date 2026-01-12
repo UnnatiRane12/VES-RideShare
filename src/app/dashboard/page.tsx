@@ -60,10 +60,10 @@ export default function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <Link href="/dashboard/create">
-          <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <Card className="h-full transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Create a Ride</CardTitle>
-              <MapPinPlus className="h-8 w-8 text-accent" />
+              <MapPinPlus className="h-8 w-8 text-primary" />
             </CardHeader>
             <CardContent>
               <CardDescription>
@@ -73,10 +73,10 @@ export default function Dashboard() {
           </Card>
         </Link>
         <Link href="/dashboard/find">
-          <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <Card className="h-full transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Find a Ride</CardTitle>
-              <Search className="h-8 w-8 text-accent" />
+              <Search className="h-8 w-8 text-primary" />
             </CardHeader>
             <CardContent>
               <CardDescription>
@@ -94,21 +94,21 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-3">
           <div className="flex flex-col items-center text-center gap-2">
-            <div className="bg-accent/20 p-3 rounded-full">
-              <Leaf className="h-8 w-8 text-accent" />
+            <div className="bg-primary/10 p-3 rounded-full">
+              <Leaf className="h-8 w-8 text-primary" />
             </div>
             <h3 className="font-semibold">Eco-Friendly</h3>
             <p className="text-sm text-muted-foreground">Fewer cars on the road means reduced carbon emissions and a healthier planet for everyone.</p>
           </div>
           <div className="flex flex-col items-center text-center gap-2">
-            <div className="bg-accent/20 p-3 rounded-full">
-                <Users className="h-8 w-8 text-accent" />
+            <div className="bg-primary/10 p-3 rounded-full">
+                <Users className="h-8 w-8 text-primary" />
             </div>
             <h3 className="font-semibold">Build Community</h3>
             <p className="text-sm text-muted-foreground">Connect with fellow students from different VES colleges, make new friends, and expand your network.</p>
           </div>
           <div className="flex flex-col items-center text-center gap-2">
-            <div className="bg-primary/20 p-3 rounded-full">
+            <div className="bg-primary/10 p-3 rounded-full">
                 <Car className="h-8 w-8 text-primary" />
             </div>
             <h3 className="font-semibold">Save Money & Time</h3>

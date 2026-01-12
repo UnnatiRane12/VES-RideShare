@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 export function Header() {
   return (
-    <header className="bg-card sticky top-0 z-40 border-b">
+    <header className="bg-white/80 backdrop-blur-lg sticky top-0 z-40 border-b">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="bg-primary text-primary-foreground p-2 rounded-lg">
