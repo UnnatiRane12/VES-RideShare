@@ -1,3 +1,6 @@
+
+'use client';
+
 import Link from "next/link";
 import { ArrowRight, Car, MapPin, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -5,23 +8,73 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { Room } from "@/lib/data";
-import { findUserById } from "@/lib/data";
+import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { doc, Timestamp } from "firebase/firestore";
+import { Skeleton } from "./ui/skeleton";
+
+type Room = {
+  id: string;
+  roomName: string;
+  ownerId: string;
+  participantIds: string[];
+  startPoint: string;
+  destination: string;
+  passengerLimit: number;
+  autoStatus: boolean;
+  expirationTime: Timestamp;
+};
+
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+};
 
 interface RoomCardProps {
   room: Room;
 }
 
+function RoomOwner({ ownerId }: { ownerId: string }) {
+  const firestore = useFirestore();
+  
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !ownerId) return null;
+    return doc(firestore, 'users', ownerId);
+  }, [firestore, ownerId]);
+
+  const { data: owner, isLoading } = useDoc<UserProfile>(userDocRef);
+
+  if (isLoading) {
+    return <Skeleton className="h-6 w-24" />;
+  }
+
+  if (!owner) {
+    return null;
+  }
+
+  const name = `${owner.firstName} ${owner.lastName}`.trim();
+  const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
+  return (
+    <div className="flex items-center gap-2">
+      <Avatar className="h-6 w-6">
+        {/* We don't have avatarUrl in Firestore user profile yet */}
+        {/* <AvatarImage src={owner.avatarUrl} alt={name} /> */}
+        <AvatarFallback>{fallback}</AvatarFallback>
+      </Avatar>
+      <span className="font-medium text-foreground">{name}</span>
+    </div>
+  );
+}
+
 export function RoomCard({ room }: RoomCardProps) {
-  const owner = findUserById(room.ownerId);
   const totalParticipants = room.participantIds.length + 1; // +1 for the owner
 
   return (
     <Card className="flex flex-col transition-shadow duration-300 hover:shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className="truncate">{room.name}</span>
-          {room.hasAuto && (
+          <span className="truncate">{room.roomName}</span>
+          {room.autoStatus && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -45,17 +98,9 @@ export function RoomCard({ room }: RoomCardProps) {
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            <span>{`${totalParticipants} / ${room.capacity} People`}</span>
+            <span>{`${totalParticipants} / ${room.passengerLimit} People`}</span>
           </div>
-          {owner && (
-            <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={owner.avatarUrl} alt={owner.name} />
-                <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <span className="font-medium text-foreground">{owner.name}</span>
-            </div>
-          )}
+          <RoomOwner ownerId={room.ownerId} />
         </div>
       </CardContent>
       <CardFooter>
