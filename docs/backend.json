@@ -2,7 +2,6 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
       "description": "Represents a user of the VES RideShare application.",
@@ -16,9 +15,13 @@
           "description": "Email address of the user.",
           "format": "email"
         },
-        "name": {
+        "firstName": {
           "type": "string",
-          "description": "Full name of the user."
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
         },
         "college": {
           "type": "string",
@@ -27,11 +30,11 @@
       },
       "required": [
         "id",
-        "email"
+        "email",
+        "firstName"
       ]
     },
     "SharingRoom": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "SharingRoom",
       "type": "object",
       "description": "Represents a ride-sharing room created by a user.",
@@ -45,12 +48,12 @@
           "description": "Reference to the User who created the room. (Relationship: User 1:N SharingRoom)"
         },
         "ownerName": {
-            "type": "string",
-            "description": "The name of the user who owns the room. Denormalized for read-efficiency."
+          "type": "string",
+          "description": "The name of the user who owns the room. Denormalized for read-efficiency."
         },
         "ownerAvatarUrl": {
-            "type": "string",
-            "description": "The avatar URL of the user who owns the room. Denormalized for read-efficiency."
+          "type": "string",
+          "description": "The avatar URL of the user who owns the room. Denormalized for read-efficiency."
         },
         "name": {
           "type": "string",
@@ -67,11 +70,6 @@
         "startingPoint": {
           "type": "string",
           "description": "The starting point for the ride sharing."
-        },
-        "expirationTime": {
-          "type": "string",
-          "description": "The date and time when the sharing room expires.",
-          "format": "date-time"
         },
         "participantIds": {
           "type": "array",
@@ -91,7 +89,8 @@
         "ownerName",
         "destination",
         "startingPoint",
-        "expirationTime"
+        "name",
+        "passengerLimit"
       ]
     }
   },
@@ -109,13 +108,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. Access is restricted to the authenticated user (path-based ownership).",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "description": "Stores user profiles. Access is restricted to the authenticated user (path-based ownership)."
         }
       },
       {
@@ -125,16 +118,11 @@
           "schema": {
             "$ref": "#/backend/entities/SharingRoom"
           },
-          "description": "Stores ride-sharing room information. Includes denormalized 'ownerId' for authorization independence.",
-          "params": [
-            {
-              "name": "sharingRoomId",
-              "description": "The unique identifier of the sharing room."
-            }
-          ]
+          "description": "Stores ride-sharing room information. Includes denormalized 'ownerId' for authorization independence."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to support the VES RideShare application, focusing on user authentication, sharing room management, and smart matching of users for ride-sharing. Authorization Independence is achieved by storing the `ownerId` within each `SharingRoom` document. This avoids the need for `get()` calls in security rules to verify ownership, enabling atomic operations. Structural Segregation is applied by storing user data in a private collection (`/users/{userId}`), while sharing rooms are stored in a separate collection (`/sharingRooms/{sharingRoomId}`), allowing for distinct security rules for each.\n\nThe structure supports required QAPs (Queries and Permissions) as follows:\n\n*   **List Sharing Rooms:** Listing is supported on the `/sharingRooms` collection.\n*   **Authorization:** Access to a sharing room will be granted to any authenticated user.\n*   **User Data Privacy:**  User documents are private, accessible only to the authenticated user."
+    ]
   }
 }
+
+    

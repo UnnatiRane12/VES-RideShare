@@ -1,162 +1,31 @@
 
-/**
- * @title Firebase Security Rules for VES RideShare
- * @description This ruleset secures the Firestore database for the VES RideShare application.
- *
- * @philosophy
- * The core philosophy is to provide strict privacy for user data while enabling a flexible,
- * collaborative environment for ride-sharing rooms. User data is protected using a strict
- * ownership model, where only the user can access their own information. Sharing rooms are
- * readable by all authenticated users to promote discovery, but write operations are
- * tightly controlled by the room's owner.
- *
- * @structure
- * The database is organized into two main top-level collections:
- * 1. /users/{userId}: Stores private user profile information. Access is locked down
- *    to the specific user whose UID matches the document ID.
- * 2. /sharingRooms/{sharingRoomId}: Stores public information about ride-sharing rooms.
- *    These documents are designed to be self-contained for security and performance.
- *
- * @decisions
- * - User Enumeration Disabled: Listing the top-level /users collection is implicitly
- *   denied to protect user privacy and prevent data scraping.
- * - Public Read for Sharing Rooms: To allow users to browse and discover available rides,
- *   all authenticated users are granted read-only access to the /sharingRooms collection.
- * - Strict Ownership for Writes: All write operations (create, update, delete) on
- *   sharing rooms are restricted to the user designated as the 'ownerId' within the
- *   document.
- *
- * @denormalization
- * Authorization relies on denormalized fields within documents to avoid costly and
- * slow 'get()' calls. Specifically, each document in the `/sharingRooms` collection
- * contains an `ownerId` and `ownerName`. This allows rules to check for ownership directly
- * on the document being accessed and display owner info efficiently.
- *
- * @segregation
- * User data and sharing room data are stored in separate top-level collections
- * (`/users` and `/sharingRooms`). This structural segregation allows for distinct and
- * clear security models for each data type, enhancing security and maintainability.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -------------------------------------------------------------------------
-    // Helper Functions
-    // -------------------------------------------------------------------------
-
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the currently authenticated user's UID matches the provided userId.
-     * This is the foundation of the user-ownership model.
-     * @param userId The UID to check against the authenticated user.
-     */
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-
-    /**
-     * Checks for ownership on an existing document. Used for update and delete
-     * operations to prevent acting on non-existent data.
-     * @param userId The UID of the document's owner.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    
+    function getRole(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role;
     }
 
-    /**
-     * Validates required relational fields for a new User document.
-     * In prototyping mode, we only validate fields critical for authorization
-     * and path integrity.
-     * @param userId The user ID from the document path.
-     */
-    function hasValidNewUserData(userId) {
-      let data = request.resource.data;
-      return data.id == userId;
-    }
-
-    /**
-     * Enforces immutability for critical fields on a User document during an update.
-     * The user's unique ID (`id`) must never be changed after creation.
-     */
-    function isUserDataImmutable() {
-      let after = request.resource.data;
-      let before = resource.data;
-      return after.id == before.id;
-    }
-
-    /**
-     * Validates required relational fields for a new SharingRoom document.
-     * Ensures the creator sets themselves as the owner and the document ID matches
-     * the internal ID field.
-     * @param sharingRoomId The room ID from the document path.
-     */
-    function hasValidNewSharingRoomData(sharingRoomId) {
-      let data = request.resource.data;
-      return isSignedIn()
-        && data.ownerId == request.auth.uid
-        && data.id == sharingRoomId
-        && data.ownerName == request.auth.token.name;
-    }
-
-    /**
-     * Enforces immutability for critical fields on a SharingRoom document.
-     * The room's unique ID (`id`), owner (`ownerId`), and owner's name (`ownerName`)
-     * must never change.
-     */
-    function isSharingRoomDataImmutable() {
-      let after = request.resource.data;
-      let before = resource.data;
-      return after.id == before.id
-        && after.ownerId == before.ownerId
-        && after.ownerName == before.ownerName;
-    }
-
-    // -------------------------------------------------------------------------
-    // Collection: users
-    // -------------------------------------------------------------------------
-
-    /**
-     * @description Rules for a user's private profile document.
-     * @path /users/{userId}
-     * @allow (get) An authenticated user reads their own profile: `db.collection('users').doc('user_abc').get()` where auth.uid is 'user_abc'.
-     * @allow (create) A new user creates their own profile document: `db.collection('users').doc('user_abc').set({ id: 'user_abc', ... })` where auth.uid is 'user_abc'.
-     * @deny (get) A user tries to read another user's profile: `db.collection('users').doc('user_xyz').get()` where auth.uid is 'user_abc'.
-     * @deny (list) Any user tries to list all user profiles: `db.collection('users').get()`.
-     * @principle Restricts access to a user's own data tree, enforcing strict data privacy.
-     */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false; // Explicitly deny listing of potential subcollections. Top-level listing is default-denied.
-      allow create: if isOwner(userId) && hasValidNewUserData(userId);
-      allow update: if isExistingOwner(userId) && isUserDataImmutable();
-      allow delete: if isExistingOwner(userId);
+      allow read, write: if isOwner(userId);
     }
 
-    // -------------------------------------------------------------------------
-    // Collection: sharingRooms
-    // -------------------------------------------------------------------------
-
-    /**
-     * @description Rules for ride-sharing room documents.
-     * @path /sharingRooms/{sharingRoomId}
-     * @allow (list) Any authenticated user browses available rooms: `db.collection('sharingRooms').get()`.
-     * @allow (create) An authenticated user creates a new room, setting themselves as owner: `db.collection('sharingRooms').add({ ownerId: 'user_abc', ... })` where auth.uid is 'user_abc'.
-     * @deny (update) A user tries to change the details of a room they do not own: `db.collection('sharingRooms').doc('room_xyz').update({ destination: '...' })` where auth.uid is not the owner.
-     * @deny (delete) A user tries to delete a room they do not own.
-     * @principle Enables public discovery (read) for authenticated users but restricts all modifications to the document owner.
-     */
-    match /sharingRooms/{sharingRoomId} {
-      allow get, list: if isSignedIn();
-      allow create: if hasValidNewSharingRoomData(sharingRoomId);
-      allow update: if isExistingOwner(resource.data.ownerId) && isSharingRoomDataImmutable();
-      allow delete: if isExistingOwner(resource.data.ownerId);
+    match /sharingRooms/{roomId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
     }
   }
 }
+
+    
