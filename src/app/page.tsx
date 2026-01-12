@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -11,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useUser } from "@/firebase";
 import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blocking-login";
-import { doc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 
 export default function AuthPage() {
@@ -34,7 +36,7 @@ export default function AuthPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleAuthAction = () => {
+  const handleAuthAction = async () => {
     const vesIdRegex = /^[a-zA-Z0-9.]+@ves\.ac\.in$/;
     if (!vesIdRegex.test(vesId)) {
       toast({
@@ -54,18 +56,19 @@ export default function AuthPage() {
         return;
     }
 
-    if (!isLogin) { // Sign Up
-        if (!fullName || !college) {
-            toast({
-                variant: "destructive",
-                title: "Missing Information",
-                description: "Please fill out all fields for sign up.",
-            });
-            return;
-        }
-        initiateEmailSignUp(auth, vesId, password);
-        // We need to listen for auth state change to get the new user's UID
-        const unsubscribe = auth.onAuthStateChanged(newUser => {
+    try {
+      if (!isLogin) { // Sign Up
+          if (!fullName || !college) {
+              toast({
+                  variant: "destructive",
+                  title: "Missing Information",
+                  description: "Please fill out all fields for sign up.",
+              });
+              return;
+          }
+          const userCredential = await createUserWithEmailAndPassword(auth, vesId, password);
+          const newUser = userCredential.user;
+
           if (newUser) {
             const userRef = doc(firestore, "users", newUser.uid);
             const [firstName, lastName] = fullName.split(' ');
@@ -77,26 +80,45 @@ export default function AuthPage() {
               lastName: lastName || '',
               college: college,
             };
-            setDocumentNonBlocking(userRef, userData, { merge: true });
-            unsubscribe();
-          }
-        });
-
-    } else { // Login
-        initiateEmailSignIn(auth, vesId, password);
-    }
-
-    auth.onAuthStateChanged(user => {
-        if (user) {
+            // Use setDoc directly here since we need to ensure it completes
+            // before navigating. non-blocking is not suitable here.
+            await setDoc(userRef, userData, { merge: true });
             router.push('/dashboard');
+          }
+
+      } else { // Login
+          await signInWithEmailAndPassword(auth, vesId, password);
+          router.push('/dashboard');
+      }
+    } catch (error: any) {
+        let title = "Authentication Failed";
+        let description = "An unexpected error occurred. Please try again.";
+
+        switch (error.code) {
+          case 'auth/invalid-credential':
+             description = "The email or password you entered is incorrect. Please check your credentials and try again.";
+             break;
+          case 'auth/user-not-found':
+            description = "No account found with this email address. Please sign up first.";
+            break;
+          case 'auth/wrong-password':
+            description = "Incorrect password. Please try again.";
+            break;
+          case 'auth/email-already-in-use':
+            title = "Sign Up Failed";
+            description = "An account with this email already exists. Please log in instead.";
+            break;
+          default:
+            description = error.message || description;
+            break;
         }
-    }, error => {
+
          toast({
             variant: "destructive",
-            title: "Authentication Failed",
-            description: error.message || "Please check your credentials and try again.",
+            title: title,
+            description: description,
         });
-    });
+    }
   };
   
     if (isUserLoading || user) {
@@ -194,3 +216,4 @@ export default function AuthPage() {
     </div>
   );
 }
+
