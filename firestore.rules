@@ -1,3 +1,4 @@
+
 /**
  * This Firestore Security Ruleset implements a hybrid security model tailored for the VES RideShare application.
  *
@@ -98,10 +99,10 @@ service cloud.firestore {
      * @principle Implements a "Public Read with Controlled Writes" model to foster collaboration while protecting data integrity.
      */
     match /rideSharingRooms/{rideSharingRoomId} {
-      allow get: if true;
-      allow list: if true;
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isSignedIn() && resource != null && request.resource.data.ownerId == resource.data.ownerId;
+      allow update: if isSignedIn() && resource != null && request.resource.data.ownerId == resource.data.id;
       allow delete: if isExistingOwner(resource.data.ownerId);
     }
   }
