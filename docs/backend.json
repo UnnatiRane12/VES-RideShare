@@ -10,10 +10,6 @@
           "type": "string",
           "description": "Unique identifier for the user."
         },
-        "vesId": {
-          "type": "string",
-          "description": "VES (institute) ID of the user."
-        },
         "email": {
           "type": "string",
           "description": "Email address of the user.",
@@ -22,11 +18,15 @@
         "name": {
           "type": "string",
           "description": "Full name of the user."
+        },
+        "college": {
+          "type": "string",
+          "description": "The college the user attends."
         }
       },
       "required": [
         "id",
-        "vesId"
+        "email"
       ]
     },
     "SharingRoom": {
@@ -88,7 +88,8 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google"
     ]
   },
   "firestore": {
