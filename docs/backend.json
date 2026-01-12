@@ -39,10 +39,6 @@
       "type": "object",
       "description": "Represents a ride-sharing room created by a user.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the sharing room."
-        },
         "ownerId": {
           "type": "string",
           "description": "Reference to the User who created the room. (Relationship: User 1:N SharingRoom)"
@@ -84,7 +80,6 @@
         }
       },
       "required": [
-        "id",
         "ownerId",
         "ownerName",
         "destination",
@@ -124,5 +119,3 @@
     ]
   }
 }
-
-    

@@ -68,7 +68,6 @@ export default function CreateRoomPage() {
       
       await setDoc(newRoomRef, {
         ...data,
-        id: newRoomRef.id,
         ownerId: user.uid,
         ownerName: user.displayName,
         ownerAvatarUrl: user.photoURL || null,
