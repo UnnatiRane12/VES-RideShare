@@ -29,7 +29,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [fullName, setFullName] = useState("");
-  const [vesId, setVesId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [college, setCollege] = useState("");
   const router = useRouter();
@@ -50,22 +50,18 @@ export default function AuthPage() {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // Check if user exists in Firestore
         const userDocRef = doc(firestore, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-            // New user, create a document in Firestore
             const [firstName, ...lastNameParts] = (user.displayName || "").split(" ");
             const lastName = lastNameParts.join(" ");
             
             await setDoc(userDocRef, {
                 id: user.uid,
-                vesId: user.email,
                 email: user.email,
                 firstName: firstName || "",
                 lastName: lastName || "",
-                college: "", // Google sign-in doesn't provide college
             });
         }
         router.push('/dashboard');
@@ -79,12 +75,12 @@ export default function AuthPage() {
   };
 
   const handleAuthAction = async () => {
-    const vesIdRegex = /^[a-zA-Z0-9.]+@ves\.ac\.in$/;
-    if (!vesIdRegex.test(vesId)) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       toast({
         variant: "destructive",
-        title: "Invalid VES ID",
-        description: "Please use a valid VES email address (e.g., 2021.johndoe@ves.ac.in).",
+        title: "Invalid Email",
+        description: "Please use a valid email address.",
       });
       return;
     }
@@ -100,7 +96,7 @@ export default function AuthPage() {
 
     try {
       if (!isLogin) { // Sign Up
-          if (!fullName || !college) {
+          if (!fullName) {
               toast({
                   variant: "destructive",
                   title: "Missing Information",
@@ -108,11 +104,10 @@ export default function AuthPage() {
               });
               return;
           }
-          const userCredential = await createUserWithEmailAndPassword(auth, vesId, password);
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const newUser = userCredential.user;
 
           if (newUser) {
-            // Update Firebase Auth profile
             await updateProfile(newUser, { displayName: fullName });
 
             const userRef = doc(firestore, "users", newUser.uid);
@@ -120,20 +115,18 @@ export default function AuthPage() {
             const lastName = lastNameParts.join(' ');
             const userData = {
               id: newUser.uid,
-              vesId: vesId,
-              email: vesId,
+              email: email,
               firstName: firstName || '',
               lastName: lastName || '',
-              college: college,
+              college: college || '',
             };
-            // Use setDoc to save user data to Firestore
             await setDoc(userRef, userData);
 
             router.push('/dashboard');
           }
 
       } else { // Login
-          await signInWithEmailAndPassword(auth, vesId, password);
+          await signInWithEmailAndPassword(auth, email, password);
           router.push('/dashboard');
       }
     } catch (error: any) {
@@ -206,19 +199,19 @@ export default function AuthPage() {
               </div>
             )}
             <div className="grid gap-2">
-              <Label htmlFor="ves-id">VES ID</Label>
+              <Label htmlFor="email">Email</Label>
               <Input 
-                id="ves-id" 
-                type="text" 
-                placeholder="e.g., 2021.janedoe@ves.ac.in" 
+                id="email" 
+                type="email" 
+                placeholder="e.g., jane.doe@example.com" 
                 required 
-                value={vesId}
-                onChange={(e) => setVesId(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
              {!isLogin && (
                <div className="grid gap-2">
-                <Label htmlFor="college">College</Label>
+                <Label htmlFor="college">College (Optional)</Label>
                 <Select onValueChange={setCollege} value={college}>
                   <SelectTrigger id="college">
                     <SelectValue placeholder="Select your college" />

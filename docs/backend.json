@@ -12,10 +12,6 @@
           "description": "Unique identifier for the user.",
           "format": "uuid"
         },
-        "vesId": {
-          "type": "string",
-          "description": "The user's VES institute ID."
-        },
         "email": {
           "type": "string",
           "description": "The user's email address.",
@@ -28,11 +24,14 @@
         "lastName": {
           "type": "string",
           "description": "The user's last name."
+        },
+        "college": {
+          "type": "string",
+          "description": "The user's college."
         }
       },
       "required": [
         "id",
-        "vesId",
         "email",
         "firstName",
         "lastName"
@@ -204,3 +203,5 @@
     "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability, aligning with the core design principles. User data is stored in a dedicated collection, while RideSharingRooms are stored in a separate collection, with the `ownerId` clearly indicating ownership. RideHistory is stored as a subcollection under each user, enabling efficient querying of a user's ride history. \n\n**Authorization Independence:** The structure denormalizes the necessary authorization context. For example, the `RideSharingRoom` stores the `ownerId`. This eliminates the need for `get()` calls in security rules to check the owner, enabling atomic operations.\n\n**QAPs Support:**\n*   **List Operations:** Segregation of data into separate collections (`users`, `rideSharingRooms`, and `rideHistory`) allows for secure and efficient list operations (QAPs). Rules can be written to allow listing of rooms based on specific criteria without exposing sensitive data.\n*   **Ownership:** Path-based ownership is used for `RideHistory` enabling simple and secure ownership-based rules."
   }
 }
+
+    

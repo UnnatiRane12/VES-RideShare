@@ -102,8 +102,10 @@ service cloud.firestore {
       allow get: if isSignedIn();
       allow list: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isSignedIn() && resource != null && request.resource.data.ownerId == resource.data.id;
+      allow update: if isSignedIn() && resource != null && request.resource.data.ownerId == resource.data.ownerId;
       allow delete: if isExistingOwner(resource.data.ownerId);
     }
   }
 }
+
+    
