@@ -1,3 +1,6 @@
+
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,8 +9,64 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CreateRoomPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  if (!isClient) {
+     return (
+      <div className="w-full max-w-2xl mx-auto">
+        <Skeleton className="h-6 w-40 mb-4" />
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-4 w-3/4 mt-2" />
+          </CardHeader>
+          <CardContent className="grid gap-6">
+            <div className="grid gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </div>
+            <div className="flex items-center space-x-2">
+                <Skeleton className="h-6 w-11" />
+                <Skeleton className="h-4 w-40" />
+            </div>
+             <div className="flex justify-end gap-2 mt-4">
+                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-10 w-28" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Link href="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
