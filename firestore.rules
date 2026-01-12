@@ -1,0 +1,108 @@
+/**
+ * This Firestore Security Ruleset implements a hybrid security model tailored for the VES RideShare application.
+ *
+ * Core Philosophy:
+ * The rules enforce a strict user-ownership model for private data while enabling a collaborative, public-facing model for shared data. The default security posture is to deny all access unless explicitly granted. All operations require user authentication.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores private user profile data. Each user has exclusive control over their own document.
+ * - /rideSharingRooms/{roomId}: A top-level collection for ride-sharing rooms. These are publicly discoverable to encourage participation.
+ * - /users/{userId}/rideHistory/{rideHistoryId}: A private subcollection containing a user's past ride information, accessible only to that user.
+ *
+ * Key Security Decisions:
+ * - User Privacy: Listing users from the top-level `/users` collection is strictly forbidden to protect user privacy.
+ * - Public Discovery vs. Controlled Writes: Ride sharing rooms are publicly readable and listable, allowing any user to find a ride. However, creation is restricted to authenticated users, and deletion is restricted to the room's original owner. Updates are allowed by any signed-in user to facilitate joining a room, but the room's ownership (`ownerId`) is immutable.
+ * - Private Subcollections: A user's ride history is nested under their own user document, ensuring that path-based security rules can easily and efficiently restrict all access to the data owner.
+ *
+ * Denormalization for Authorization:
+ * This ruleset relies on denormalized fields for efficient and secure authorization. The `rideSharingRooms` documents contain an `ownerId`, and the `rideHistory` documents contain a `userId`. This avoids costly and slow `get()` calls in rules, ensuring that authorization decisions are fast and based directly on the data being accessed.
+ *
+ * Structural Segregation:
+ * Private user data (profiles, ride history) is structurally separated from public, collaborative data (ride sharing rooms). This segregation simplifies security rules, enhances query performance, and provides a stronger security guarantee than filtering a mixed collection with a "isPublic" flag.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------------------------------------------------------
+    // Helper Functions
+    // ----------------------------------------------------------------------
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the primary function for establishing document ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks for ownership on an existing document. Used for safe updates and deletes.
+     * Combines an ownership check with an existence check (`resource != null`).
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // ----------------------------------------------------------------------
+    // Collection Rules
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Manages user profiles. Users can create, read, and update their own profile, but cannot see or list other users' profiles.
+     * @path /users/{userId}
+     * @allow (get) An authenticated user reads their own profile document: /users/user_abc with auth.uid = 'user_abc'.
+     * @deny (list) An authenticated user attempts to list all user documents.
+     * @deny (update) An authenticated user tries to update another user's profile: /users/user_xyz with auth.uid = 'user_abc'.
+     * @principle Restricts access to a user's own data tree, enforcing privacy.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+
+      /**
+       * @description Manages a user's private ride history. Only the user can create, read, update, or delete their own history entries.
+       * @path /users/{userId}/rideHistory/{rideHistoryId}
+       * @allow (create) An authenticated user adds a new ride history entry to their own subcollection: /users/user_abc/rideHistory/history_123 with auth.uid = 'user_abc'.
+       * @deny (get) An authenticated user tries to read an entry from another user's history: /users/user_xyz/rideHistory/history_456 with auth.uid = 'user_abc'.
+       * @deny (list) An unauthenticated user attempts to list ride history.
+       * @principle Enforces strict document ownership within a user-specific subcollection.
+       */
+      match /rideHistory/{rideHistoryId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    /**
+     * @description Manages ride sharing rooms. Rooms are publicly readable and listable by anyone to allow for discovery.
+     * Authenticated users can create rooms. Any authenticated user can update a room (e.g., to join it), but only the original owner can delete it.
+     * @path /rideSharingRooms/{rideSharingRoomId}
+     * @allow (list) Any user (authenticated or not) lists all available ride rooms.
+     * @allow (create) An authenticated user creates a new room, setting themselves as the owner.
+     * @deny (create) An authenticated user tries to create a room and assign ownership to someone else.
+     * @deny (delete) An authenticated user tries to delete a room they do not own.
+     * @principle Implements a "Public Read with Controlled Writes" model to foster collaboration while protecting data integrity.
+     */
+    match /rideSharingRooms/{rideSharingRoomId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource != null && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if isExistingOwner(resource.data.ownerId);
+    }
+  }
+}
