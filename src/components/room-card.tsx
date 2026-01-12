@@ -35,7 +35,7 @@ function RoomOwner({ ownerName, ownerAvatarUrl }: { ownerName: string; ownerAvat
          <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
         <AvatarFallback>{fallback}</AvatarFallback>
       </Avatar>
-      <span className="font-medium text-foreground">{ownerName}</span>
+      <span className="font-medium text-sm text-foreground">{ownerName}</span>
     </div>
   );
 }
@@ -44,16 +44,16 @@ export function RoomCard({ room }: RoomCardProps) {
   const totalParticipants = room.participantIds.length;
 
   return (
-    <Card className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span className="truncate">{room.name}</span>
+        <div className="flex items-start justify-between gap-4">
+          <CardTitle className="text-lg font-bold">{room.name}</CardTitle>
           {room.autoStatus && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                    <Car className="mr-1 h-4 w-4" /> Ready
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0">
+                    <Car className="mr-1 h-3 w-3" /> Ready
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -62,23 +62,23 @@ export function RoomCard({ room }: RoomCardProps) {
               </Tooltip>
             </TooltipProvider>
           )}
-        </CardTitle>
-        <CardDescription className="flex items-center gap-2 pt-1">
+        </div>
+        <CardDescription className="flex items-center gap-2 pt-1 text-sm">
             <MapPin className="h-4 w-4 text-muted-foreground"/> 
-            <span>{room.startingPoint} to {room.destination}</span>
+            <span className="truncate">{room.startingPoint} to {room.destination}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            <span>{`${totalParticipants} / ${room.passengerLimit} People`}</span>
+            <span className="font-medium">{`${totalParticipants} / ${room.passengerLimit} Riders`}</span>
           </div>
           <RoomOwner ownerName={room.ownerName} ownerAvatarUrl={room.ownerAvatarUrl} />
         </div>
       </CardContent>
       <CardFooter>
-        <Button asChild className="w-full">
+        <Button asChild className="w-full bg-gradient-to-r from-primary to-violet-500 text-white">
           <Link href={`/dashboard/rooms/${room.id}`}>
             View Details <ArrowRight className="ml-2 h-4 w-4" />
           </Link>

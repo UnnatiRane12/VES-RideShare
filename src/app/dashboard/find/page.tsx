@@ -57,52 +57,53 @@ export default function FindRoomPage() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <div className="lg:col-span-1 space-y-6">
-        <Card className="shadow-lg sticky top-20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Search className="h-6 w-6" />
-              Find a Ride
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-4" onSubmit={handleSearch}>
-              <div className="grid gap-2">
-                <Label htmlFor="start-point">Starting Point</Label>
-                <Input 
-                  id="start-point" 
-                  placeholder="e.g., Chembur Station" 
-                  value={search.startPoint} 
-                  onChange={(e) => setSearch(prev => ({ ...prev, startPoint: e.target.value }))}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="destination">Destination</Label>
-                <Input 
-                  id="destination" 
-                  placeholder="e.g., VESIT" 
-                  value={search.destination}
-                  onChange={(e) => setSearch(prev => ({ ...prev, destination: e.target.value }))}
-                />
-              </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-violet-500 text-white">
-                Search
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-        
-        <Alert className="bg-primary/5 border-primary/20">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <AlertTitle className="font-bold text-primary">Smart Suggestions</AlertTitle>
-          <AlertDescription>
-            Can't find a ride? Our AI can help you find rides to nearby destinations or suggest common routes. Try searching to see suggestions!
-          </AlertDescription>
-        </Alert>
-
+      <div className="lg:col-span-1">
+        <div className="sticky top-24 space-y-6">
+            <Card className="shadow-lg">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                <Search className="h-6 w-6" />
+                Find a Ride
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <form className="grid gap-4" onSubmit={handleSearch}>
+                <div className="grid gap-2">
+                    <Label htmlFor="start-point">Starting Point</Label>
+                    <Input 
+                    id="start-point" 
+                    placeholder="e.g., Chembur Station" 
+                    value={search.startPoint} 
+                    onChange={(e) => setSearch(prev => ({ ...prev, startPoint: e.target.value }))}
+                    />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="destination">Destination</Label>
+                    <Input 
+                    id="destination" 
+                    placeholder="e.g., VESIT" 
+                    value={search.destination}
+                    onChange={(e) => setSearch(prev => ({ ...prev, destination: e.target.value }))}
+                    />
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-violet-500 text-white">
+                    Search
+                </Button>
+                </form>
+            </CardContent>
+            </Card>
+            
+            <Alert className="bg-primary/5 border-primary/20">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <AlertTitle className="font-bold text-primary">Smart Suggestions</AlertTitle>
+            <AlertDescription>
+                Can't find a ride? Our AI can help you find rides to nearby destinations or suggest common routes. Try searching to see suggestions!
+            </AlertDescription>
+            </Alert>
+        </div>
       </div>
       <div className="lg:col-span-3">
-        <h2 className="text-3xl font-bold tracking-tight mb-4">Available Rooms</h2>
+        <h2 className="text-3xl font-bold tracking-tight mb-6">Available Rooms</h2>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Skeleton className="h-52 rounded-lg" />
@@ -110,7 +111,7 @@ export default function FindRoomPage() {
             <Skeleton className="h-52 rounded-lg" />
           </div>
         ) : availableRooms && availableRooms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {availableRooms.map((room) => (
               <RoomCard key={room.id} room={room} />
             ))}
