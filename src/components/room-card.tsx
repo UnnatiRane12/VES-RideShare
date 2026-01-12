@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, Timestamp } from "firebase/firestore";
-import { Skeleton } from "./ui/skeleton";
+import { Timestamp } from "firebase/firestore";
 
 type Room = {
   id: string;
   roomName: string;
   ownerId: string;
+  ownerName: string;
+  ownerAvatarUrl?: string;
   participantIds: string[];
   startPoint: string;
   destination: string;
@@ -24,44 +24,20 @@ type Room = {
   expirationTime: Timestamp;
 };
 
-type UserProfile = {
-  firstName: string;
-  lastName: string;
-};
-
 interface RoomCardProps {
   room: Room;
 }
 
-function RoomOwner({ ownerId }: { ownerId: string }) {
-  const firestore = useFirestore();
-  
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !ownerId) return null;
-    return doc(firestore, 'users', ownerId);
-  }, [firestore, ownerId]);
-
-  const { data: owner, isLoading } = useDoc<UserProfile>(userDocRef);
-
-  if (isLoading) {
-    return <Skeleton className="h-6 w-24" />;
-  }
-
-  if (!owner) {
-    return null;
-  }
-
-  const name = `${owner.firstName} ${owner.lastName}`.trim();
-  const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+function RoomOwner({ ownerName, ownerAvatarUrl }: { ownerName: string; ownerAvatarUrl?: string }) {
+  const fallback = ownerName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   return (
     <div className="flex items-center gap-2">
       <Avatar className="h-6 w-6">
-        {/* We don't have avatarUrl in Firestore user profile yet */}
-        {/* <AvatarImage src={owner.avatarUrl} alt={name} /> */}
+         <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
         <AvatarFallback>{fallback}</AvatarFallback>
       </Avatar>
-      <span className="font-medium text-foreground">{name}</span>
+      <span className="font-medium text-foreground">{ownerName}</span>
     </div>
   );
 }
@@ -100,7 +76,7 @@ export function RoomCard({ room }: RoomCardProps) {
             <Users className="h-4 w-4" />
             <span>{`${totalParticipants} / ${room.passengerLimit} People`}</span>
           </div>
-          <RoomOwner ownerId={room.ownerId} />
+          <RoomOwner ownerName={room.ownerName} ownerAvatarUrl={room.ownerAvatarUrl} />
         </div>
       </CardContent>
       <CardFooter>

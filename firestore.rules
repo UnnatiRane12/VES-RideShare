@@ -1,3 +1,4 @@
+
 /**
  * @title Firebase Security Rules for VES RideShare
  * @description This ruleset secures the Firestore database for the VES RideShare application.
@@ -28,8 +29,8 @@
  * @denormalization
  * Authorization relies on denormalized fields within documents to avoid costly and
  * slow 'get()' calls. Specifically, each document in the `/sharingRooms` collection
- * contains an `ownerId` field. This allows rules to check for ownership directly
- * on the document being accessed, resulting in simpler, faster, and more secure rules.
+ * contains an `ownerId` and `ownerName`. This allows rules to check for ownership directly
+ * on the document being accessed and display owner info efficiently.
  *
  * @segregation
  * User data and sharing room data are stored in separate top-level collections
@@ -100,18 +101,21 @@ service cloud.firestore {
       let data = request.resource.data;
       return isSignedIn()
         && data.ownerId == request.auth.uid
-        && data.id == sharingRoomId;
+        && data.id == sharingRoomId
+        && data.ownerName == request.auth.token.name;
     }
 
     /**
      * Enforces immutability for critical fields on a SharingRoom document.
-     * The room's unique ID (`id`) and its owner (`ownerId`) must never change.
+     * The room's unique ID (`id`), owner (`ownerId`), and owner's name (`ownerName`)
+     * must never change.
      */
     function isSharingRoomDataImmutable() {
       let after = request.resource.data;
       let before = resource.data;
       return after.id == before.id
-        && after.ownerId == before.ownerId;
+        && after.ownerId == before.ownerId
+        && after.ownerName == before.ownerName;
     }
 
     // -------------------------------------------------------------------------

@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAuth, useFirestore, useUser } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -55,7 +55,7 @@ export default function CreateRoomPage() {
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    if (!user) {
+    if (!user || !firestore) {
       toast({
         variant: "destructive",
         title: "Not Authenticated",
@@ -67,9 +67,11 @@ export default function CreateRoomPage() {
     try {
       const expirationDate = new Date(Date.now() + parseInt(data.expirationTime) * 60000);
 
-      await addDoc(collection(firestore, "rideSharingRooms"), {
+      await addDoc(collection(firestore, "sharingRooms"), {
         ...data,
         ownerId: user.uid,
+        ownerName: user.displayName,
+        ownerAvatarUrl: user.photoURL || null,
         participantIds: [],
         createdAt: serverTimestamp(),
         expirationTime: expirationDate,
@@ -272,5 +274,3 @@ export default function CreateRoomPage() {
     </div>
   );
 }
-
-    
