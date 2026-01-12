@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { MapPinPlus, Search } from "lucide-react";
+import { MapPinPlus, Search, Car, Leaf, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Dashboard() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome, John!</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome, Jane!</h1>
         <p className="text-muted-foreground">Ready to share a ride? Get started below.</p>
       </div>
 
@@ -38,6 +38,36 @@ export default function Dashboard() {
           </Card>
         </Link>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Why Share Your Ride?</CardTitle>
+          <CardDescription>Discover the benefits of carpooling with VES RideShare.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 md:grid-cols-3">
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="bg-accent/20 p-3 rounded-full">
+              <Leaf className="h-8 w-8 text-accent" />
+            </div>
+            <h3 className="font-semibold">Eco-Friendly</h3>
+            <p className="text-sm text-muted-foreground">Fewer cars on the road means reduced carbon emissions and a healthier planet for everyone.</p>
+          </div>
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="bg-accent/20 p-3 rounded-full">
+                <Users className="h-8 w-8 text-accent" />
+            </div>
+            <h3 className="font-semibold">Build Community</h3>
+            <p className="text-sm text-muted-foreground">Connect with fellow students from different VES colleges, make new friends, and expand your network.</p>
+          </div>
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className="bg-primary/20 p-3 rounded-full">
+                <Car className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="font-semibold">Save Money & Time</h3>
+            <p className="text-sm text-muted-foreground">Split travel costs for autos and taxis. Plus, finding a ride is faster when you do it together.</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
