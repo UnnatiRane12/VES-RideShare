@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User as UserIcon, LogOut, Settings, History } from "lucide-react";
+import { LogOut, History } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -72,23 +72,15 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserIcon className="mr-2" />
-            Profile
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/my-rides" className="flex items-center w-full">
+            <Link href="/dashboard/my-rides" className="flex items-center w-full cursor-pointer">
               <History className="mr-2" />
               My Rides
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2" />
-            Settings
-          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           <LogOut className="mr-2" />
           Log out
         </DropdownMenuItem>
