@@ -63,8 +63,8 @@ export default function AuthPage() {
                 id: user.uid,
                 vesId: user.email,
                 email: user.email,
-                firstName: firstName,
-                lastName: lastName,
+                firstName: firstName || "",
+                lastName: lastName || "",
                 college: "", // Google sign-in doesn't provide college
             });
         }
@@ -116,7 +116,8 @@ export default function AuthPage() {
             await updateProfile(newUser, { displayName: fullName });
 
             const userRef = doc(firestore, "users", newUser.uid);
-            const [firstName, lastName] = fullName.split(' ');
+            const [firstName, ...lastNameParts] = fullName.split(' ');
+            const lastName = lastNameParts.join(' ');
             const userData = {
               id: newUser.uid,
               vesId: vesId,
@@ -275,3 +276,5 @@ export default function AuthPage() {
     </div>
   );
 }
+
+    
