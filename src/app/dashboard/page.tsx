@@ -26,7 +26,7 @@ export default function Dashboard() {
     );
   }
 
-  const name = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const name = user?.displayName || 'User';
 
   return (
     <div className="flex flex-col gap-8">

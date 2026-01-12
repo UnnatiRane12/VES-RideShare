@@ -34,9 +34,9 @@ export function UserNav() {
     return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
   }
 
-  const name = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const name = user?.displayName || 'User';
   const email = user?.email || 'user@ves.ac.in';
-  const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
 
   return (
