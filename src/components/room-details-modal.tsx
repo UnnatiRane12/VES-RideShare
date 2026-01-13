@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { CardContent } from '@/components/ui/card';
@@ -58,13 +58,15 @@ function RiderAvatar({ userId }: { userId: string }) {
 
 interface RoomDetailsModalProps {
     room: Room;
+    isOpen: boolean;
     onClose: () => void;
 }
 
-export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModalProps) {
+export function RoomDetailsModal({ room: initialRoom, isOpen, onClose }: RoomDetailsModalProps) {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
+  const [isMapReady, setIsMapReady] = useState(false);
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !initialRoom.id) return null;
@@ -110,7 +112,12 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
   const isRoomFull = room.participantIds.length >= room.passengerLimit;
 
   return (
-     <Dialog open={!!room} onOpenChange={(isOpen) => !isOpen && onClose()}>
+     <Dialog open={isOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsMapReady(false); // Reset map state on close
+          onClose();
+        }
+      }}>
         <DialogContent className="max-w-lg p-0">
             <DialogHeader className="p-6 pb-4 space-y-2">
                 <DialogTitle className="text-2xl font-bold">{room.name}</DialogTitle>
@@ -159,7 +166,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                  <div>
                     <h3 className="text-lg font-semibold mb-4 text-foreground">Map</h3>
                     <div className="rounded-lg overflow-hidden border">
-                       <LeafletMap origin={room.startingPoint} destination={room.destination} />
+                       {isOpen && <LeafletMap origin={room.startingPoint} destination={room.destination} onReady={() => setIsMapReady(true)}/>}
                     </div>
                 </div>
 

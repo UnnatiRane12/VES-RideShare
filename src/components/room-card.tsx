@@ -58,7 +58,7 @@ export function RoomCard({ room }: RoomCardProps) {
         </Button>
       </CardFooter>
     </Card>
-    {isModalOpen && <RoomDetailsModal room={room} onClose={() => setIsModalOpen(false)} />}
+    {isModalOpen && <RoomDetailsModal room={room} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </>
   );
 }

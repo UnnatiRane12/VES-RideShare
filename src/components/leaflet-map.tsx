@@ -8,7 +8,6 @@ import L from 'leaflet';
 import { Skeleton } from './ui/skeleton';
 
 // Fix for default icon not showing in Next.js
-import 'leaflet/dist/leaflet.css';
 import 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/images/marker-icon-2x.png';
 
@@ -34,6 +33,7 @@ interface GeocodingResult {
 interface LeafletMapProps {
     origin: string;
     destination: string;
+    onReady?: () => void;
 }
 
 const fetchCoordinates = async (address: string): Promise<LatLngTuple | null> => {
@@ -63,15 +63,21 @@ const MapBoundsUpdater = ({ bounds }: { bounds: L.LatLngBounds | null }) => {
     return null;
 };
 
-export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) => {
+export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onReady }) => {
     const [originCoords, setOriginCoords] = useState<LatLngTuple | null>(null);
     const [destinationCoords, setDestinationCoords] = useState<LatLngTuple | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
-    const [mapId, setMapId] = useState(`${origin}-${destination}-${Date.now()}`);
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) return;
+
         const geocodeAddresses = async () => {
             setIsLoading(true);
             setError(null);
@@ -88,7 +94,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
                 setDestinationCoords(destResult);
                 const newBounds = L.latLngBounds(originResult, destResult);
                 setBounds(newBounds);
-                setMapId(`${origin}-${destination}-${Date.now()}`);
+                if (onReady) onReady();
             } else {
                 setError("Could not find coordinates for one or both locations.");
                 console.error("Geocoding failed:", { origin, destResult });
@@ -96,10 +102,10 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
             setIsLoading(false);
         };
         geocodeAddresses();
-    }, [origin, destination]);
+    }, [origin, destination, isClient, onReady]);
 
 
-    if (isLoading) {
+    if (!isClient || isLoading) {
         return <Skeleton className="h-48 w-full" />;
     }
 
@@ -113,7 +119,6 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
 
     return (
         <MapContainer
-            key={mapId}
             center={originCoords}
             zoom={13}
             style={{ height: '12rem', width: '100%' }}
