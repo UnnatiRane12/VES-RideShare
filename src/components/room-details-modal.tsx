@@ -7,8 +7,6 @@ import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -23,7 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 
-function RiderAvatar({ userId }: { userId: string }) {
+function RiderAvatar({ userId, avatarUrl }: { userId: string, avatarUrl?: string | null }) {
   const firestore = useFirestore();
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !userId) return null;
@@ -33,6 +31,7 @@ function RiderAvatar({ userId }: { userId: string }) {
   const { data: userProfile } = useDoc(userDocRef);
 
   const name = userProfile?.firstName || 'User';
+  const finalAvatarUrl = avatarUrl || (userProfile as any)?.photoURL;
   const fallback = name[0]?.toUpperCase();
 
   return (
@@ -40,7 +39,7 @@ function RiderAvatar({ userId }: { userId: string }) {
         <Tooltip>
             <TooltipTrigger>
                 <Avatar>
-                    <AvatarImage src={(userProfile as any)?.avatarUrl} alt={name} />
+                    <AvatarImage src={finalAvatarUrl} alt={name} />
                     <AvatarFallback>{fallback}</AvatarFallback>
                 </Avatar>
             </TooltipTrigger>
@@ -79,14 +78,14 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
 
 
   const handleJoinLeaveRoom = async () => {
-    if (!user || !room) return;
+    if (!user || !room || !roomDocRef) return;
 
     const isParticipant = room.participantIds.includes(user.uid);
     const operation = isParticipant ? arrayRemove : arrayUnion;
     const feedbackVerb = isParticipant ? 'Left' : 'Joined';
     
     try {
-      await updateDoc(roomDocRef!, {
+      await updateDoc(roomDocRef, {
         participantIds: operation(user.uid),
       });
 
@@ -165,7 +164,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                         <h3 className="text-xl font-semibold mb-4">Riders</h3>
                         <div className="flex space-x-4">
                             {room.participantIds.map(riderId => (
-                                <RiderAvatar key={riderId} userId={riderId} />
+                                <RiderAvatar key={riderId} userId={riderId} avatarUrl={riderId === room.ownerId ? room.ownerAvatarUrl : null} />
                             ))}
                         </div>
                     </div>
