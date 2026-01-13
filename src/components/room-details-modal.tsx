@@ -7,17 +7,17 @@ import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import {
   Card,
   CardContent,
-  CardFooter,
+  CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Car, MapPin, Users, User, LogIn, LogOut } from 'lucide-react';
+import { Car, MapPin, Users, LogIn, LogOut } from 'lucide-react';
 import type { Room } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { GoogleMapComponent } from '@/components/google-map';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -109,55 +109,55 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
 
   return (
      <Dialog open={!!room} onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <DialogContent className="max-w-4xl p-0">
+        <DialogContent className="max-w-2xl p-0">
             <Card className="border-none shadow-none">
-                 <DialogHeader className="p-6 pb-0">
+                 <DialogHeader className="p-6 pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div>
                             <DialogTitle asChild>
-                                <CardTitle className="text-3xl font-bold tracking-tight mb-2">{room.name}</CardTitle>
+                                <CardTitle className="text-3xl font-bold tracking-tight">{room.name}</CardTitle>
                             </DialogTitle>
                             <DialogDescription asChild>
-                                <div className="flex items-center gap-2 text-muted-foreground">
+                                <div className="flex items-center gap-2 text-muted-foreground mt-2">
                                     <MapPin className="h-5 w-5" />
                                     <span className="font-medium">{room.startingPoint} to {room.destination}</span>
                                 </div>
                             </DialogDescription>
                         </div>
                         {room.autoStatus && (
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0 text-base px-4 py-2">
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0 text-base px-4 py-2 mt-1">
                                 <Car className="mr-2 h-5 w-5" /> Auto Secured
                             </Badge>
                         )}
                     </div>
                 </DialogHeader>
-                <CardContent className="p-6 pt-4 space-y-8">
-                    <GoogleMapComponent origin={room.startingPoint} destination={room.destination} />
-
+                <CardContent className="p-6 pt-4 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
                          <Card className="bg-card/50">
                             <CardHeader>
-                               <CardTitle className="flex items-center justify-center gap-2"><Users className="text-primary"/>Capacity</CardTitle>
+                               <CardTitle className="flex items-center justify-center gap-2 text-xl font-semibold"><Users className="text-primary"/>Capacity</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-lg font-semibold">{`${room.participantIds.length} / ${room.passengerLimit} Riders`}</p>
+                                <p className="text-2xl font-bold">{`${room.participantIds.length} / ${room.passengerLimit}`}</p>
+                                <p className="text-sm text-muted-foreground">Riders</p>
                             </CardContent>
                         </Card>
                          <Card className="bg-card/50">
                             <CardHeader>
-                               <CardTitle className="flex items-center justify-center gap-2"><Car className="text-primary"/>Status</CardTitle>
+                               <CardTitle className="flex items-center justify-center gap-2 text-xl font-semibold"><Car className="text-primary"/>Status</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-lg font-semibold">{room.autoStatus ? 'Auto Ready' : 'Finding Auto'}</p>
+                                <p className="text-2xl font-bold">{room.autoStatus ? 'Auto Ready' : 'Finding Auto'}</p>
+                                <p className="text-sm text-muted-foreground">Ride Status</p>
                             </CardContent>
                         </Card>
                     </div>
 
                     <div>
                         <h3 className="text-xl font-semibold mb-4">Riders</h3>
-                        <div className="flex space-x-4">
+                        <div className="flex flex-wrap gap-4">
                             {room.participantIds.map(riderId => (
-                                <RiderAvatar key={riderId} userId={riderId} avatarUrl={riderId === room.ownerId ? room.ownerAvatarUrl : null} />
+                                <RiderAvatar key={riderId} userId={riderId} avatarUrl={riderId === room.ownerId ? room.ownerAvatarUrl : undefined} />
                             ))}
                         </div>
                     </div>
