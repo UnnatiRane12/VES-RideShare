@@ -22,9 +22,13 @@ interface GoogleMapProps {
 export function GoogleMap({ startPoint, destination }: GoogleMapProps) {
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const directionsServiceOptions = useMemo(() => {
     return {
@@ -46,20 +50,14 @@ export function GoogleMap({ startPoint, destination }: GoogleMapProps) {
     }
   };
   
-  // Use a simple effect to set isLoaded to true on the client
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-
-  if (!isLoaded) {
+  if (!isClient) {
     return <Skeleton className="w-full h-full" />;
   }
 
   if (!googleMapsApiKey) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-muted text-muted-foreground text-center p-4">
-        Google Maps API key is missing. Please add it to your environment variables to display the map.
+        Google Maps API key is missing. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file and restart the server.
       </div>
     );
   }
