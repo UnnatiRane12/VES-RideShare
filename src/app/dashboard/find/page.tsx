@@ -85,7 +85,7 @@ export default function FindRoomPage() {
                     onChange={(e) => setSearch(prev => ({ ...prev, destination: e.target.value }))}
                     />
                 </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-violet-500 text-white">
+                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-teal-400 text-primary-foreground">
                     Search
                 </Button>
                 </form>
@@ -108,7 +108,7 @@ export default function FindRoomPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg min-h-[400px] bg-gray-50/50">
+          <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg min-h-[400px] bg-card/50">
             <Lightbulb className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold">No Rooms Found</h3>
             <p className="text-muted-foreground mt-2 max-w-sm">

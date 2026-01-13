@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useFirestore, useUser } from "@/firebase";
-import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
@@ -240,7 +240,7 @@ export default function CreateRoomPage() {
                     <Button variant="outline" asChild type="button">
                     <Link href="/dashboard">Cancel</Link>
                     </Button>
-                    <Button type="submit" disabled={form.formState.isSubmitting} className="bg-gradient-to-r from-primary to-violet-500 text-white">
+                    <Button type="submit" disabled={form.formState.isSubmitting} className="bg-gradient-to-r from-primary to-teal-400 text-primary-foreground">
                     {form.formState.isSubmitting ? "Creating..." : "Create Room"}
                     </Button>
                 </div>
@@ -250,7 +250,7 @@ export default function CreateRoomPage() {
         </Card>
       </div>
       <div className="w-full lg:w-1/3 space-y-6">
-        <Card className="bg-primary/5 border-primary/20">
+        <Card className="bg-card/50 border-primary/20">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Car className="h-5 w-5 text-primary" />
@@ -258,9 +258,9 @@ export default function CreateRoomPage() {
                 </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-2">
-                <p>1. <span className="font-semibold">Fill in the Details:</span> Name your room, set your start and end points, and choose the number of seats.</p>
-                <p>2. <span className="font-semibold">Find Riders:</span> Your room will be visible to other students looking for a ride on the same route.</p>
-                <p>3. <span className="font-semibold">Ride Together:</span> Once your room is full, you can coordinate with your fellow riders and share the journey!</p>
+                <p>1. <span className="font-semibold text-foreground">Fill in the Details:</span> Name your room, set your start and end points, and choose the number of seats.</p>
+                <p>2. <span className="font-semibold text-foreground">Find Riders:</span> Your room will be visible to other students looking for a ride on the same route.</p>
+                <p>3. <span className="font-semibold text-foreground">Ride Together:</span> Once your room is full, you can coordinate with your fellow riders and share the journey!</p>
             </CardContent>
         </Card>
       </div>

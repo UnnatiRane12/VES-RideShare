@@ -82,7 +82,6 @@ export default function AuthPage() {
             const [firstName, ...lastNameParts] = fullName.split(' ');
             const lastName = lastNameParts.join(' ');
             const userData = {
-              id: newUser.uid,
               email: email,
               firstName: firstName || '',
               lastName: lastName || '',
@@ -138,7 +137,7 @@ export default function AuthPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="mx-auto w-full max-w-sm shadow-2xl">
         <CardHeader>
           <div className="flex justify-center mb-4">
@@ -146,7 +145,7 @@ export default function AuthPage() {
               <Car className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-500">VES RideShare</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-teal-400">VES RideShare</CardTitle>
           <CardDescription className="text-center text-muted-foreground">
             {isLogin ? "Welcome back! Please log in." : "Join our community of student commuters."}
           </CardDescription>

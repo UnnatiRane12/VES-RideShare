@@ -69,7 +69,7 @@ function RiderAvatar({ userId, isOwner }: { userId: string, isOwner: boolean }) 
             </Avatar>
             <span className="text-xs font-semibold truncate w-full">{name}</span>
             {isOwner && (
-                <div className="absolute -top-1 -right-1 bg-primary rounded-full p-0.5 text-primary-foreground">
+                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
                     <Award className="h-3 w-3" />
                 </div>
             )}
@@ -200,7 +200,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
                            <Car className="h-5 w-5 text-primary"/>
                            <span className="font-medium">Vehicle Status</span>
                         </div>
-                        <Badge variant={room.autoStatus ? "default" : "secondary"} className={room.autoStatus ? "bg-green-500/20 text-green-700" : ""}>
+                        <Badge variant={room.autoStatus ? "default" : "secondary"} className={room.autoStatus ? "bg-green-500/20 text-green-700 dark:bg-green-900/50 dark:text-green-300" : ""}>
                            {room.autoStatus ? "Secured" : "Not Secured"}
                         </Badge>
                     </div>
@@ -216,7 +216,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
                     </div>
                      <Separator/>
                      <div className="flex flex-col items-center gap-2">
-                         <Button className="w-full bg-gradient-to-r from-primary to-violet-500 text-white" disabled={(isFull && !isUserInRoom) || isOwner} onClick={handleJoinLeave}>
+                         <Button className="w-full bg-gradient-to-r from-primary to-teal-400 text-primary-foreground" disabled={(isFull && !isUserInRoom) || isOwner} onClick={handleJoinLeave}>
                             {buttonText()}
                         </Button>
                         {isOwner && <p className="text-xs text-muted-foreground">You are the owner of this room.</p>}

@@ -78,7 +78,7 @@ export function RoomCard({ room }: RoomCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button asChild className="w-full bg-gradient-to-r from-primary to-violet-500 text-white">
+        <Button asChild className="w-full bg-gradient-to-r from-primary to-teal-400 text-primary-foreground">
           <Link href={`/dashboard/rooms/${room.id}`}>
             View Details <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
