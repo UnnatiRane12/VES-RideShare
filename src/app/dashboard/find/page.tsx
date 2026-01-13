@@ -6,21 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lightbulb, Search, Sparkles } from "lucide-react";
+import { Lightbulb, Search } from "lucide-react";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { FormEvent, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Room } from "@/lib/data";
-import { smartRouteSuggestions, SmartRouteSuggestionsOutput } from "@/ai/flows/smart-route-suggestions";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function FindRoomPage() {
   const firestore = useFirestore();
   const [search, setSearch] = useState({ startPoint: '', destination: '' });
   const [submittedSearch, setSubmittedSearch] = useState({ startPoint: '', destination: '' });
-  const [suggestions, setSuggestions] = useState<SmartRouteSuggestionsOutput | null>(null);
-  const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
 
   const roomsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -44,22 +40,6 @@ export default function FindRoomPage() {
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmittedSearch(search);
-    if(search.startPoint && search.destination) {
-      setIsAISuggestionLoading(true);
-      setSuggestions(null);
-      try {
-        const result = await smartRouteSuggestions({
-            startPoint: search.startPoint,
-            destination: search.destination,
-            autoStatus: false, // You can adjust this if you have this info
-        });
-        setSuggestions(result);
-      } catch (error) {
-        console.error("AI suggestion error:", error);
-      } finally {
-        setIsAISuggestionLoading(false);
-      }
-    }
   };
 
   return (
@@ -99,40 +79,6 @@ export default function FindRoomPage() {
                 </form>
             </CardContent>
           </Card>
-           {isAISuggestionLoading && (
-            <div className="p-4 space-y-3 rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary animate-pulse"/>
-                    <h3 className="font-semibold">Generating Smart Suggestions...</h3>
-                </div>
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-            </div>
-           )}
-           {suggestions && (
-              <Alert>
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <AlertTitle>Smart Suggestions</AlertTitle>
-                  <AlertDescription>
-                    {suggestions.suggestedRoutes.length > 0 && (
-                        <div className="mt-2">
-                            <h4 className="font-semibold text-foreground">Suggested Routes:</h4>
-                            <ul className="list-disc list-inside text-xs">
-                                {suggestions.suggestedRoutes.map((route, i) => <li key={i}>{route}</li>)}
-                            </ul>
-                        </div>
-                    )}
-                    {suggestions.nearbyDestinations.length > 0 && (
-                        <div className="mt-2">
-                            <h4 className="font-semibold text-foreground">Nearby Destinations:</h4>
-                            <ul className="list-disc list-inside text-xs">
-                                {suggestions.nearbyDestinations.map((dest, i) => <li key={i}>{dest}</li>)}
-                            </ul>
-                        </div>
-                    )}
-                  </AlertDescription>
-              </Alert>
-           )}
         </div>
       </div>
       <div className="lg:col-span-3">
