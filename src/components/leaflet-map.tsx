@@ -37,8 +37,16 @@ interface LeafletMapProps {
 }
 
 const fetchCoordinates = async (address: string): Promise<LatLngTuple | null> => {
+    let query = address;
+    if (!/mumbai/i.test(query)) {
+        query += ", Mumbai";
+    }
+    if (!/india/i.test(query)) {
+        query += ", India";
+    }
+
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`);
         if (!response.ok) {
             throw new Error('Failed to fetch coordinates from Nominatim API');
         }
@@ -48,7 +56,7 @@ const fetchCoordinates = async (address: string): Promise<LatLngTuple | null> =>
         }
         return null;
     } catch (error) {
-        console.error(`Geocoding error for ${address}:`, error);
+        console.error(`Geocoding error for ${query}:`, error);
         return null;
     }
 };
@@ -70,6 +78,8 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onR
     const [error, setError] = useState<string | null>(null);
     const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
     const [isClient, setIsClient] = useState(false);
+    const mapId = `${origin}-${destination}-${Math.random()}`;
+
 
     useEffect(() => {
         setIsClient(true);
@@ -82,10 +92,9 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onR
             setIsLoading(true);
             setError(null);
             
-            // Add a small delay to respect Nominatim's usage policy (1 req/sec)
-            const originPromise = fetchCoordinates(origin + ", Mumbai, India");
-            await new Promise(resolve => setTimeout(resolve, 1100));
-            const destPromise = fetchCoordinates(destination + ", Mumbai, India");
+            const originPromise = fetchCoordinates(origin);
+            await new Promise(resolve => setTimeout(resolve, 1100)); // Respect Nominatim's usage policy
+            const destPromise = fetchCoordinates(destination);
 
             const [originResult, destResult] = await Promise.all([originPromise, destPromise]);
 
@@ -97,7 +106,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onR
                 if (onReady) onReady();
             } else {
                 setError("Could not find coordinates for one or both locations.");
-                console.error("Geocoding failed:", { origin, destResult });
+                console.error("Geocoding failed:", { originResult, destResult });
             }
             setIsLoading(false);
         };
@@ -119,6 +128,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onR
 
     return (
         <MapContainer
+            key={mapId}
             center={originCoords}
             zoom={13}
             style={{ height: '12rem', width: '100%' }}
