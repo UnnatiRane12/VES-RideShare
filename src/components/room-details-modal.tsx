@@ -15,14 +15,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Car, MapPin, Users, LogIn, LogOut } from 'lucide-react';
+import { Car, MapPin, Users, LogIn, LogOut, Flag, Dot } from 'lucide-react';
 import type { Room } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Separator } from './ui/separator';
 
 
-function RiderAvatar({ userId, avatarUrl }: { userId: string, avatarUrl?: string | null }) {
+function RiderAvatar({ userId }: { userId: string }) {
   const firestore = useFirestore();
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !userId) return null;
@@ -32,14 +33,14 @@ function RiderAvatar({ userId, avatarUrl }: { userId: string, avatarUrl?: string
   const { data: userProfile } = useDoc(userDocRef);
 
   const name = userProfile?.firstName || 'User';
-  const finalAvatarUrl = avatarUrl || (userProfile as any)?.photoURL;
+  const finalAvatarUrl = (userProfile as any)?.photoURL;
   const fallback = name[0]?.toUpperCase();
 
   return (
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger>
-                <Avatar>
+                <Avatar className="h-12 w-12 border-2 border-primary/30">
                     <AvatarImage src={finalAvatarUrl} alt={name} />
                     <AvatarFallback>{fallback}</AvatarFallback>
                 </Avatar>
@@ -109,72 +110,76 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
 
   return (
      <Dialog open={!!room} onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <DialogContent className="max-w-2xl p-0">
-            <Card className="border-none shadow-none">
-                 <DialogHeader className="p-6 pb-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                        <div>
-                            <DialogTitle asChild>
-                                <CardTitle className="text-3xl font-bold tracking-tight">{room.name}</CardTitle>
-                            </DialogTitle>
-                            <DialogDescription asChild>
-                                <div className="flex items-center gap-2 text-muted-foreground mt-2">
-                                    <MapPin className="h-5 w-5" />
-                                    <span className="font-medium">{room.startingPoint} to {room.destination}</span>
+        <DialogContent className="max-w-lg p-0">
+            <div className="p-6">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                        <DialogTitle asChild>
+                            <h2 className="text-3xl font-bold tracking-tight">{room.name}</h2>
+                        </DialogTitle>
+                    </div>
+                    {room.autoStatus && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0 text-sm px-3 py-1 mt-1">
+                            <Car className="mr-2 h-4 w-4" /> Auto Secured
+                        </Badge>
+                    )}
+                </div>
+
+                <div className="space-y-6">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-3 text-primary">Details</h3>
+                        <div className="space-y-3 text-sm">
+                            <div className="flex items-center gap-3">
+                                <MapPin className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <span className="text-muted-foreground">From</span>
+                                    <p className="font-medium">{room.startingPoint}</p>
                                 </div>
-                            </DialogDescription>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Flag className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <span className="text-muted-foreground">To</span>
+                                    <p className="font-medium">{room.destination}</p>
+                                </div>
+                            </div>
+                              <div className="flex items-center gap-3">
+                                <Car className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <span className="text-muted-foreground">Ride Status</span>
+                                    <p className="font-medium">{room.autoStatus ? 'Auto/Cab is Ready' : 'Searching for Auto/Cab'}</p>
+                                </div>
+                            </div>
                         </div>
-                        {room.autoStatus && (
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0 text-base px-4 py-2 mt-1">
-                                <Car className="mr-2 h-5 w-5" /> Auto Secured
-                            </Badge>
-                        )}
                     </div>
-                </DialogHeader>
-                <CardContent className="p-6 pt-4 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
-                         <Card className="bg-card/50">
-                            <CardHeader>
-                               <CardTitle className="flex items-center justify-center gap-2 text-xl font-semibold"><Users className="text-primary"/>Capacity</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-2xl font-bold">{`${room.participantIds.length} / ${room.passengerLimit}`}</p>
-                                <p className="text-sm text-muted-foreground">Riders</p>
-                            </CardContent>
-                        </Card>
-                         <Card className="bg-card/50">
-                            <CardHeader>
-                               <CardTitle className="flex items-center justify-center gap-2 text-xl font-semibold"><Car className="text-primary"/>Status</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-2xl font-bold">{room.autoStatus ? 'Auto Ready' : 'Finding Auto'}</p>
-                                <p className="text-sm text-muted-foreground">Ride Status</p>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    
+                    <Separator />
 
                     <div>
-                        <h3 className="text-xl font-semibold mb-4">Riders</h3>
+                        <h3 className="text-lg font-semibold mb-4">
+                           Riders ({room.participantIds.length} / {room.passengerLimit})
+                        </h3>
                         <div className="flex flex-wrap gap-4">
                             {room.participantIds.map(riderId => (
-                                <RiderAvatar key={riderId} userId={riderId} avatarUrl={riderId === room.ownerId ? room.ownerAvatarUrl : undefined} />
+                                <RiderAvatar key={riderId} userId={riderId} />
                             ))}
                         </div>
                     </div>
-                </CardContent>
-                <CardFooter className="p-6 bg-card/50">
-                {user && (
-                    <Button className="w-full text-lg py-6" onClick={handleJoinLeaveRoom} disabled={!user || (isRoomFull && !isUserParticipant)}>
-                        {isUserParticipant ? <><LogOut className="mr-2"/>Leave Room</> : <><LogIn className="mr-2"/>Join Room</>}
-                    </Button>
-                )}
-                {!user && (
-                    <Button className="w-full text-lg py-6" disabled>
-                        Login to Join Room
-                    </Button>
-                )}
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
+            
+            <div className="p-6 bg-card/50 border-t">
+              {user && (
+                  <Button className="w-full text-lg py-6" onClick={handleJoinLeaveRoom} disabled={!user || (isRoomFull && !isUserParticipant)}>
+                      {isUserParticipant ? <><LogOut className="mr-2"/>Leave Room</> : <><LogIn className="mr-2"/>Join Room</>}
+                  </Button>
+              )}
+              {!user && (
+                  <Button className="w-full text-lg py-6" disabled>
+                      Login to Join Room
+                  </Button>
+              )}
+            </div>
         </DialogContent>
      </Dialog>
   );
