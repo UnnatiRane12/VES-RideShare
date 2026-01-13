@@ -1,12 +1,14 @@
 
 'use client';
 
-import { Car, MapPin, Users } from "lucide-react";
+import { ArrowRight, Car, MapPin, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Room } from "@/lib/data";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 interface RoomCardProps {
   room: Room;
@@ -63,8 +65,13 @@ export function RoomCard({ room }: RoomCardProps) {
           <RoomOwner ownerName={room.ownerName} ownerAvatarUrl={room.ownerAvatarUrl} />
         </div>
       </CardContent>
+       <CardFooter className="pt-4">
+        <Button asChild className="w-full bg-gradient-to-r from-primary/90 to-teal-400/90 text-primary-foreground hover:scale-105 transition-transform">
+          <Link href={`/dashboard/rooms/${room.id}`}>
+            View Details <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
-
-    
