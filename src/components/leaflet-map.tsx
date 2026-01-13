@@ -33,7 +33,6 @@ interface GeocodingResult {
 interface LeafletMapProps {
     origin: string;
     destination: string;
-    onReady?: () => void;
 }
 
 const fetchCoordinates = async (address: string): Promise<LatLngTuple | null> => {
@@ -71,23 +70,16 @@ const MapBoundsUpdater = ({ bounds }: { bounds: L.LatLngBounds | null }) => {
     return null;
 };
 
-export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onReady }) => {
+export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) => {
     const [originCoords, setOriginCoords] = useState<LatLngTuple | null>(null);
     const [destinationCoords, setDestinationCoords] = useState<LatLngTuple | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
-    const [isClient, setIsClient] = useState(false);
     const mapId = `${origin}-${destination}-${Math.random()}`;
 
 
     useEffect(() => {
-        setIsClient(true);
-    }, []);
-
-    useEffect(() => {
-        if (!isClient) return;
-
         const geocodeAddresses = async () => {
             setIsLoading(true);
             setError(null);
@@ -103,7 +95,6 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onR
                 setDestinationCoords(destResult);
                 const newBounds = L.latLngBounds(originResult, destResult);
                 setBounds(newBounds);
-                if (onReady) onReady();
             } else {
                 setError("Could not find coordinates for one or both locations.");
                 console.error("Geocoding failed:", { originResult, destResult });
@@ -111,10 +102,10 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination, onR
             setIsLoading(false);
         };
         geocodeAddresses();
-    }, [origin, destination, isClient, onReady]);
+    }, [origin, destination]);
 
 
-    if (!isClient || isLoading) {
+    if (isLoading) {
         return <Skeleton className="h-48 w-full" />;
     }
 

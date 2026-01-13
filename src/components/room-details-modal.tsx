@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { CardContent } from '@/components/ui/card';
@@ -13,8 +14,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
-import { LeafletMap } from './leaflet-map';
 
+const LeafletMap = dynamic(
+  () => import('./leaflet-map').then((mod) => mod.LeafletMap),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-48 w-full" />,
+  }
+);
 
 
 function RiderAvatar({ userId }: { userId: string }) {
@@ -66,7 +73,6 @@ export function RoomDetailsModal({ room: initialRoom, isOpen, onClose }: RoomDet
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const [isMapReady, setIsMapReady] = useState(false);
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !initialRoom.id) return null;
@@ -114,7 +120,6 @@ export function RoomDetailsModal({ room: initialRoom, isOpen, onClose }: RoomDet
   return (
      <Dialog open={isOpen} onOpenChange={(open) => {
         if (!open) {
-          setIsMapReady(false); // Reset map state on close
           onClose();
         }
       }}>
@@ -166,7 +171,7 @@ export function RoomDetailsModal({ room: initialRoom, isOpen, onClose }: RoomDet
                  <div>
                     <h3 className="text-lg font-semibold mb-4 text-foreground">Map</h3>
                     <div className="rounded-lg overflow-hidden border">
-                       {isOpen && <LeafletMap origin={room.startingPoint} destination={room.destination} onReady={() => setIsMapReady(true)}/>}
+                       {isOpen && <LeafletMap origin={room.startingPoint} destination={room.destination} />}
                     </div>
                 </div>
 
