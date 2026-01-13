@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { CardContent } from '@/components/ui/card';
@@ -14,14 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
-
-const LeafletMap = dynamic(
-  () => import('./leaflet-map').then((mod) => mod.LeafletMap),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-48 w-full" />,
-  }
-);
 
 
 function RiderAvatar({ userId }: { userId: string }) {
@@ -163,15 +154,6 @@ export function RoomDetailsModal({ room: initialRoom, isOpen, onClose }: RoomDet
                                 <p className="font-medium text-foreground">{room.autoStatus ? 'Auto/Cab is Ready' : 'Searching for Auto/Cab'}</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <Separator />
-
-                 <div>
-                    <h3 className="text-lg font-semibold mb-4 text-foreground">Map</h3>
-                    <div className="rounded-lg overflow-hidden border">
-                       {isOpen && <LeafletMap origin={room.startingPoint} destination={room.destination} />}
                     </div>
                 </div>
 
