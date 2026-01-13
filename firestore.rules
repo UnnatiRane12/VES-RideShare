@@ -10,9 +10,11 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-    
-    function getRole(uid) {
-      return get(/databases/$(database)/documents/users/$(uid)).data.role;
+
+    function isVesUser() {
+      let userProfile = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let validColleges = ["VESIM", "VESCOL", "VESIT", "VESASC", "VESCOP", "VESCOA", "VESPOLY"];
+      return userProfile.college in validColleges;
     }
 
     match /users/{userId} {
@@ -20,12 +22,10 @@ service cloud.firestore {
     }
 
     match /sharingRooms/{roomId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && isVesUser();
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && isVesUser();
       allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
     }
   }
 }
-
-    
