@@ -2,21 +2,21 @@
 'use client';
 
 import Link from "next/link";
-import { ArrowLeft, Car, Clock, Edit, MapPin, Users, CheckCircle, User, Award, Shield, UserPlus } from "lucide-react";
+import { ArrowLeft, Car, Clock, Edit, MapPin, Users, CheckCircle, User, Award, Shield, UserPlus, Mail, School } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { useFirestore, useDoc, useMemoFirebase, useUser } from "@/firebase";
-import { doc, updateDoc, arrayUnion, arrayRemove, Timestamp } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { GoogleMap } from "@/components/google-map";
 import React from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Room = {
   id: string;
@@ -35,6 +35,7 @@ type UserProfile = {
   firstName: string;
   lastName: string;
   college: string;
+  email: string;
   avatarUrl?: string; 
 };
 
@@ -46,7 +47,6 @@ function RiderAvatar({ userId, isOwner }: { userId: string, isOwner: boolean }) 
     }, [firestore, userId]);
     
     const { data: userProfile, isLoading } = useDoc<UserProfile>(userDocRef);
-    const placeholder = PlaceHolderImages.find(p => p.id === 'user-avatar-placeholder');
 
     if(isLoading || !userProfile) return (
       <div className="flex flex-col items-center gap-1 w-16 text-center">
@@ -59,21 +59,42 @@ function RiderAvatar({ userId, isOwner }: { userId: string, isOwner: boolean }) 
     const fallback = name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
     return (
-        <div className="flex flex-col items-center gap-1 w-16 text-center relative">
-             <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-primary">
-                 {userProfile.avatarUrl ? 
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col items-center gap-1 w-16 text-center relative cursor-pointer">
+              <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-primary">
+                  {userProfile.avatarUrl ? 
                     <AvatarImage src={userProfile.avatarUrl} alt={name} /> :
-                    placeholder && <AvatarImage src={placeholder.imageUrl} alt={name} />
-                 }
-                <AvatarFallback>{fallback}</AvatarFallback>
-            </Avatar>
-            <span className="text-xs font-semibold truncate w-full">{name}</span>
-            {isOwner && (
-                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
-                    <Award className="h-3 w-3" />
+                    <AvatarImage src={user?.photoURL || undefined} alt={name} />
+                  }
+                  <AvatarFallback>{fallback}</AvatarFallback>
+              </Avatar>
+              <span className="text-xs font-semibold truncate w-full">{userProfile.firstName}</span>
+              {isOwner && (
+                  <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                      <Award className="h-3 w-3" />
+                  </div>
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="flex flex-col gap-2 p-1">
+              <p className="font-bold text-base">{name}</p>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{userProfile.email}</span>
+              </div>
+              {userProfile.college && (
+                <div className="flex items-center gap-2">
+                  <School className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{userProfile.college}</span>
                 </div>
-            )}
-        </div>
+              )}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     )
 }
 
@@ -209,7 +230,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
                     <div>
                         <h3 className="text-md font-semibold mb-3">Who's In?</h3>
                         <div className="flex flex-wrap gap-4">
-                            {participants.map((riderId, index) => (
+                            {participants.map((riderId) => (
                                 <RiderAvatar key={riderId} userId={riderId} isOwner={riderId === room.ownerId} />
                             ))}
                         </div>
