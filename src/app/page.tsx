@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useUser } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -28,7 +28,7 @@ export default function AuthPage() {
   const { user, isUserLoading } = useUser();
 
   useEffect(() => {
-    if (!isUserLoading && user) {
+    if (!isUserLoading && user && user.emailVerified) {
       router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
@@ -43,12 +43,11 @@ export default function AuthPage() {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!email.endsWith('@ves.ac.in')) {
       toast({
         variant: "destructive",
         title: "Invalid Email",
-        description: "Please use a valid email address.",
+        description: "You must use a valid '@ves.ac.in' email address to access this service.",
       });
       return;
     }
@@ -77,6 +76,7 @@ export default function AuthPage() {
 
           if (newUser) {
             await updateProfile(newUser, { displayName: fullName });
+            await sendEmailVerification(newUser);
 
             const userRef = doc(firestore, "users", newUser.uid);
             const [firstName, ...lastNameParts] = fullName.split(' ');
@@ -89,12 +89,25 @@ export default function AuthPage() {
             };
             await setDoc(userRef, userData);
 
-            router.push('/dashboard');
+            toast({
+              title: "Account Created!",
+              description: "A verification link has been sent to your email. Please verify your account before logging in.",
+            });
+            setIsLogin(true); // Switch to login view after successful sign-up
           }
 
       } else { // Login
-          await signInWithEmailAndPassword(auth, email, password);
-          router.push('/dashboard');
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+           if (!userCredential.user.emailVerified) {
+            await auth.signOut(); // Log out unverified user
+            toast({
+              variant: "destructive",
+              title: "Email Not Verified",
+              description: "You must verify your email address before logging in. Please check your inbox for the verification link.",
+            });
+          } else {
+            router.push('/dashboard');
+          }
       }
     } catch (error: any) {
         let title = "Authentication Failed";
@@ -127,13 +140,26 @@ export default function AuthPage() {
     }
   };
   
-    if (isUserLoading || user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p>Loading...</p> 
-      </div>
-    );
-  }
+    if (isUserLoading) {
+        return (
+          <div className="flex min-h-screen items-center justify-center bg-background">
+            <p>Loading...</p> 
+          </div>
+        );
+    }
+    
+    if (user && !user.emailVerified) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-background">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-2">Please Verify Your Email</h1>
+                    <p className="text-muted-foreground">A verification link has been sent to <span className="font-semibold text-primary">{user.email}</span>.</p>
+                    <p className="text-muted-foreground mt-1">Check your inbox to continue.</p>
+                     <Button variant="link" className="mt-4" onClick={() => auth.signOut()}>Log out</Button>
+                </div>
+            </div>
+        );
+    }
 
 
   return (
@@ -170,7 +196,7 @@ export default function AuthPage() {
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="e.g., jane.doe@example.com" 
+                placeholder="e.g., jane.doe@ves.ac.in" 
                 required 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

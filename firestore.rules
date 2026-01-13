@@ -6,26 +6,28 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-
+    
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
-    function isVesUser() {
-      let userProfile = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      let validColleges = ["VESIM", "VESCOL", "VESIT", "VESASC", "VESCOP", "VESCOA", "VESPOLY"];
-      return userProfile.college in validColleges;
+    function isVesEmail() {
+      return request.auth.token.email.matches('.*@ves.ac.in$');
+    }
+
+    function isVerifiedVesUser() {
+      return isSignedIn() && request.auth.token.email_verified && isVesEmail();
     }
 
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) && isVerifiedVesUser();
     }
 
     match /sharingRooms/{roomId} {
-      allow read: if isSignedIn() && isVesUser();
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && isVesUser();
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow read: if isVerifiedVesUser();
+      allow create: if isVerifiedVesUser() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isVerifiedVesUser() && resource.data.ownerId == request.auth.uid;
+      allow delete: if isVerifiedVesUser() && resource.data.ownerId == request.auth.uid;
     }
   }
 }
