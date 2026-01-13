@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Room } from "@/lib/data";
 import { Button } from "./ui/button";
-import Link from "next/link";
+import { useState } from "react";
+import { RoomDetailsModal } from "./room-details-modal";
 
 interface RoomCardProps {
   room: Room;
@@ -29,9 +30,11 @@ function RoomOwner({ ownerName, ownerAvatarUrl }: { ownerName: string; ownerAvat
 }
 
 export function RoomCard({ room }: RoomCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const totalParticipants = room.participantIds.length;
 
   return (
+    <>
     <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
@@ -66,12 +69,12 @@ export function RoomCard({ room }: RoomCardProps) {
         </div>
       </CardContent>
        <CardFooter className="pt-4">
-        <Button asChild className="w-full bg-gradient-to-r from-primary/90 to-teal-400/90 text-primary-foreground hover:scale-105 transition-transform">
-          <Link href={`/dashboard/rooms/${room.id}`}>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full bg-gradient-to-r from-primary/90 to-teal-400/90 text-primary-foreground hover:scale-105 transition-transform">
             View Details <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
         </Button>
       </CardFooter>
     </Card>
+    {isModalOpen && <RoomDetailsModal room={room} onClose={() => setIsModalOpen(false)} />}
+    </>
   );
 }
