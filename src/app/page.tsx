@@ -34,6 +34,15 @@ export default function AuthPage() {
   }, [user, isUserLoading, router]);
 
   const handleAuthAction = async () => {
+    if (!auth || !firestore) {
+      toast({
+        variant: "destructive",
+        title: "Services not ready",
+        description: "Authentication services are not available yet. Please try again in a moment.",
+      });
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast({
