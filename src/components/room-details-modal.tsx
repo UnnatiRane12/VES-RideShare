@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
+import { LeafletMap } from './leaflet-map';
 
 
 
@@ -158,7 +159,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                  <div>
                     <h3 className="text-lg font-semibold mb-4 text-foreground">Map</h3>
                     <div className="rounded-lg overflow-hidden border">
-                       <Skeleton className="h-48 w-full" />
+                       <LeafletMap origin={room.startingPoint} destination={room.destination} />
                     </div>
                 </div>
 
