@@ -1,9 +1,7 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Add leaflet's CSS */
-@import "leaflet/dist/leaflet.css";
 
 @layer base {
   :root {
@@ -70,7 +68,6 @@
     @apply bg-background text-foreground;
   }
 }
-
 
 .leaflet-control-attribution a {
   color: hsl(var(--primary)) !important;

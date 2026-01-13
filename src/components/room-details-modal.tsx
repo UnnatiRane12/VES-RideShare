@@ -2,7 +2,6 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { CardContent } from '@/components/ui/card';
@@ -15,11 +14,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
 
-
-const LeafletMap = dynamic(() => import('./leaflet-map').then(m => m.LeafletMap), {
-  ssr: false,
-  loading: () => <Skeleton className="h-48 w-full" />,
-});
 
 
 function RiderAvatar({ userId }: { userId: string }) {
@@ -164,7 +158,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                  <div>
                     <h3 className="text-lg font-semibold mb-4 text-foreground">Map</h3>
                     <div className="rounded-lg overflow-hidden border">
-                       <LeafletMap origin={room.startingPoint} destination={room.destination} />
+                       <Skeleton className="h-48 w-full" />
                     </div>
                 </div>
 
