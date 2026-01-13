@@ -2,13 +2,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Car } from "lucide-react";
+import { ArrowLeft, Car, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,8 @@ import { useFirestore, useUser } from "@/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { extractRideDetails } from "@/ai/flows/extract-ride-details";
 
 
 const formSchema = z.object({
@@ -36,7 +38,9 @@ export default function CreateRoomPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  
+  const [aiQuery, setAiQuery] = useState("");
+  const [isExtracting, startTransition] = useTransition();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +55,39 @@ export default function CreateRoomPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const handleAiExtract = () => {
+    if (!aiQuery) {
+      toast({
+        variant: "destructive",
+        title: "Input required",
+        description: "Please describe your ride in the text box.",
+      });
+      return;
+    }
+    startTransition(async () => {
+      try {
+        const result = await extractRideDetails({ query: aiQuery });
+        if (result) {
+          form.setValue("name", result.name, { shouldValidate: true });
+          form.setValue("startingPoint", result.startingPoint, { shouldValidate: true });
+          form.setValue("destination", result.destination, { shouldValidate: true });
+          form.setValue("passengerLimit", result.passengerLimit, { shouldValidate: true });
+          toast({
+            title: "Details Extracted!",
+            description: "The form has been populated with the extracted details.",
+          });
+        }
+      } catch (error) {
+        console.error("AI extraction failed:", error);
+        toast({
+          variant: "destructive",
+          title: "AI Extraction Failed",
+          description: "Could not extract details from your request. Please fill the form manually.",
+        });
+      }
+    });
+  };
 
   const onSubmit = async (data: FormData) => {
     if (!user || !firestore) {
@@ -134,7 +171,32 @@ export default function CreateRoomPage() {
   }
 
   return (
-     <div className="max-w-2xl mx-auto">
+     <div className="max-w-2xl mx-auto space-y-8">
+        
+        <Card className="shadow-lg bg-card/80 border-primary/20">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-6 w-6 text-primary"/>
+                    Describe Your Ride with AI
+                </CardTitle>
+                <CardDescription>
+                    No time to fill out the form? Just type what you need below and let AI handle it.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col sm:flex-row gap-4">
+                <Textarea
+                    placeholder="e.g., 'Need a ride from Chembur to VESIT for 3 people tomorrow morning'"
+                    className="flex-grow"
+                    value={aiQuery}
+                    onChange={(e) => setAiQuery(e.target.value)}
+                    disabled={isExtracting}
+                />
+                <Button onClick={handleAiExtract} disabled={isExtracting} className="bg-gradient-to-r from-primary/80 to-teal-400/80 text-primary-foreground">
+                    {isExtracting ? "Generating..." : "Generate with AI"}
+                </Button>
+            </CardContent>
+        </Card>
+
         <Card className="shadow-lg">
             <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight">Create a Sharing Room</CardTitle>
@@ -191,7 +253,7 @@ export default function CreateRoomPage() {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Total Seats (including you)</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
+                        <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)}>
                             <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select total number of seats" />
@@ -213,7 +275,7 @@ export default function CreateRoomPage() {
                         render={({ field }) => (
                         <FormItem>
                             <FormLabel>Auto/Cab Secured?</FormLabel>
-                            <div className="flex items-center space-x-2 rounded-md border p-2 h-10">
+                             <div className="flex items-center space-x-2 rounded-md border p-2 h-10">
                                 <FormControl>
                                 <Switch
                                     id="auto-status-switch"
@@ -232,7 +294,7 @@ export default function CreateRoomPage() {
                     <Button variant="outline" asChild type="button">
                     <Link href="/dashboard">Cancel</Link>
                     </Button>
-                    <Button type="submit" disabled={form.formState.isSubmitting} className="bg-gradient-to-r from-primary to-teal-400 text-primary-foreground">
+                    <Button type="submit" disabled={form.formState.isSubmitting || isExtracting} className="bg-gradient-to-r from-primary to-teal-400 text-primary-foreground">
                     {form.formState.isSubmitting ? "Creating..." : "Create Room"}
                     </Button>
                 </div>
