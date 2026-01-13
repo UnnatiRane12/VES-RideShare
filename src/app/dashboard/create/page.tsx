@@ -18,8 +18,6 @@ import { useFirestore, useUser } from "@/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 
 const formSchema = z.object({
@@ -38,7 +36,6 @@ export default function CreateRoomPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const collegeImage = PlaceHolderImages.find(p => p.id === 'college-campus-placeholder');
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -95,60 +92,49 @@ export default function CreateRoomPage() {
   
   if (!isClient) {
      return (
-      <div className="flex flex-col-reverse lg:flex-row gap-8 max-w-6xl mx-auto">
-        <div className="w-full lg:w-2/3">
-            <Skeleton className="h-6 w-40 mb-4" />
-            <Card>
-            <CardHeader>
-                <Skeleton className="h-8 w-1/2" />
-                <Skeleton className="h-4 w-3/4 mt-2" />
-            </CardHeader>
-            <CardContent className="grid gap-6">
+      <div className="max-w-2xl mx-auto">
+        <Card>
+        <CardHeader>
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-4 w-3/4 mt-2" />
+        </CardHeader>
+        <CardContent className="grid gap-6">
+            <div className="grid gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-10 w-full" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                    <div className="grid gap-2">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
+                <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
                 </div>
-                <div className="flex items-center space-x-2">
-                    <Skeleton className="h-6 w-11" />
-                    <Skeleton className="h-4 w-40" />
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                    <Skeleton className="h-10 w-20" />
-                    <Skeleton className="h-10 w-28" />
-                </div>
-            </CardContent>
-            </Card>
-        </div>
-        <div className="w-full lg:w-1/3">
-            <Skeleton className="h-64 w-full" />
-        </div>
+            </div>
+            <div className="flex items-center space-x-2">
+                <Skeleton className="h-6 w-11" />
+                <Skeleton className="h-4 w-40" />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-10 w-28" />
+            </div>
+        </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-     <div className="flex flex-col-reverse lg:flex-row gap-8 max-w-6xl mx-auto">
-      <div className="w-full lg:w-2/3">
-        <Link href="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-        </Link>
+     <div className="max-w-2xl mx-auto">
         <Card className="shadow-lg">
             <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight">Create a Sharing Room</CardTitle>
@@ -254,34 +240,6 @@ export default function CreateRoomPage() {
             </Form>
             </CardContent>
         </Card>
-      </div>
-      <div className="w-full lg:w-1/3 space-y-6">
-        {collegeImage && (
-            <div className="overflow-hidden rounded-lg shadow-lg">
-                <Image
-                    src={collegeImage.imageUrl}
-                    alt={collegeImage.description}
-                    width={600}
-                    height={400}
-                    data-ai-hint={collegeImage.imageHint}
-                    className="object-cover w-full h-full"
-                />
-            </div>
-        )}
-        <Card className="bg-card/50 border-primary/20">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Car className="h-5 w-5 text-primary" />
-                    How it Works
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-                <p>1. <span className="font-semibold text-foreground">Fill in the Details:</span> Name your room, set your start and end points, and choose the number of seats.</p>
-                <p>2. <span className="font-semibold text-foreground">Find Riders:</span> Your room will be visible to other students looking for a ride on the same route.</p>
-                <p>3. <span className="font-semibold text-foreground">Ride Together:</span> Once your room is full, you can coordinate with your fellow riders and share the journey!</p>
-            </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
