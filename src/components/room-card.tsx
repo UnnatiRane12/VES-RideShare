@@ -1,12 +1,10 @@
 
 'use client';
 
-import Link from "next/link";
-import { ArrowRight, Car, MapPin, Users } from "lucide-react";
+import { Car, MapPin, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Room } from "@/lib/data";
 
@@ -33,7 +31,7 @@ export function RoomCard({ room }: RoomCardProps) {
 
   return (
     <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-      <CardHeader>
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <CardTitle className="text-lg font-bold">{room.name}</CardTitle>
           {room.autoStatus && (
@@ -56,7 +54,7 @@ export function RoomCard({ room }: RoomCardProps) {
             <span className="truncate">{room.startingPoint} to {room.destination}</span>
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -65,11 +63,6 @@ export function RoomCard({ room }: RoomCardProps) {
           <RoomOwner ownerName={room.ownerName} ownerAvatarUrl={room.ownerAvatarUrl} />
         </div>
       </CardContent>
-      <CardFooter>
-        <Button disabled className="w-full bg-gradient-to-r from-primary to-teal-400 text-primary-foreground">
-            View Details <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
