@@ -8,6 +8,7 @@ import L from 'leaflet';
 import { Skeleton } from './ui/skeleton';
 
 // Fix for default icon not showing in Next.js
+import 'leaflet/dist/leaflet.css';
 import 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/images/marker-icon-2x.png';
 
@@ -68,6 +69,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
+    const [mapId, setMapId] = useState(`${origin}-${destination}-${Date.now()}`);
 
     useEffect(() => {
         const geocodeAddresses = async () => {
@@ -86,6 +88,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
                 setDestinationCoords(destResult);
                 const newBounds = L.latLngBounds(originResult, destResult);
                 setBounds(newBounds);
+                setMapId(`${origin}-${destination}-${Date.now()}`);
             } else {
                 setError("Could not find coordinates for one or both locations.");
                 console.error("Geocoding failed:", { origin, destResult });
@@ -110,6 +113,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
 
     return (
         <MapContainer
+            key={mapId}
             center={originCoords}
             zoom={13}
             style={{ height: '12rem', width: '100%' }}
