@@ -110,7 +110,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({ origin, destination }) =
     }
 
     if (error) {
-        return <div className="h-48 w-full flex items-center justify-center bg-muted text-destructive-foreground">{error}</div>;
+        return <div className="h-48 w-full flex items-center justify-center bg-muted text-destructive-foreground p-4 text-center">{error}</div>;
     }
 
     if (!originCoords || !destinationCoords) {
