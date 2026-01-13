@@ -19,7 +19,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { extractRideDetails } from "@/ai/flows/extract-ride-details";
+import { extractRideDetails } from "@/server/ai/flows/extract-ride-details";
 
 
 const formSchema = z.object({
@@ -305,5 +305,7 @@ export default function CreateRoomPage() {
     </div>
   );
 }
+
+    
 
     
