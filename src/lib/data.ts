@@ -1,6 +1,4 @@
 
-// This file is kept for type definitions, but mock data is no longer used.
-
 export type User = {
   id: string;
   name: string;
@@ -19,4 +17,3 @@ export type Room = {
   passengerLimit: number;
   autoStatus: boolean;
 };
-

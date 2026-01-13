@@ -17,19 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { GoogleMap } from "@/components/google-map";
 import React from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-type Room = {
-  id: string;
-  name: string;
-  ownerId: string;
-  ownerName: string;
-  ownerAvatarUrl?: string;
-  participantIds: string[];
-  startingPoint: string;
-  destination: string;
-  passengerLimit: number;
-  autoStatus: boolean;
-};
+import type { Room } from "@/lib/data";
 
 type UserProfile = {
   firstName: string;
@@ -104,7 +92,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const { id } = React.use(params);
+  const { id } = params;
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -250,5 +238,3 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
-
-    
