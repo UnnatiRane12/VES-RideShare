@@ -18,6 +18,9 @@ import { useFirestore, useUser } from "@/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+
 
 const formSchema = z.object({
   name: z.string().min(3, "Room name must be at least 3 characters."),
@@ -35,6 +38,7 @@ export default function CreateRoomPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
+  const collegeImage = PlaceHolderImages.find(p => p.id === 'college-campus-placeholder');
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -221,17 +225,19 @@ export default function CreateRoomPage() {
                         control={form.control}
                         name="autoStatus"
                         render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm h-full mt-auto">
-                            <div className="space-y-0.5">
-                            <FormLabel className="text-base">Auto/Cab Secured?</FormLabel>
+                        <FormItem>
+                            <FormLabel>Auto/Cab Secured?</FormLabel>
+                            <div className="flex items-center space-x-2 rounded-md border p-2 h-10">
+                                <FormControl>
+                                <Switch
+                                    id="auto-status-switch"
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                                </FormControl>
+                                <label htmlFor="auto-status-switch" className="text-sm text-muted-foreground">{field.value ? "Yes, I have a ride" : "Not yet"}</label>
                             </div>
-                            <FormControl>
-                            <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
-                            </FormControl>
-                        </FormItem>
+                         </FormItem>
                         )}
                     />
                 </div>
@@ -250,6 +256,18 @@ export default function CreateRoomPage() {
         </Card>
       </div>
       <div className="w-full lg:w-1/3 space-y-6">
+        {collegeImage && (
+            <div className="overflow-hidden rounded-lg shadow-lg">
+                <Image
+                    src={collegeImage.imageUrl}
+                    alt={collegeImage.description}
+                    width={600}
+                    height={400}
+                    data-ai-hint={collegeImage.imageHint}
+                    className="object-cover w-full h-full"
+                />
+            </div>
+        )}
         <Card className="bg-card/50 border-primary/20">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
