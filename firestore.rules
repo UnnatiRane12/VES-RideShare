@@ -15,19 +15,19 @@ service cloud.firestore {
       return request.auth.token.email.matches('.*@ves.ac.in$');
     }
 
-    function isVerifiedVesUser() {
-      return isSignedIn() && request.auth.token.email_verified && isVesEmail();
+    function isVesUser() {
+      return isSignedIn() && isVesEmail();
     }
 
     match /users/{userId} {
-      allow read, write: if isOwner(userId) && isVerifiedVesUser();
+      allow read, write: if isOwner(userId) && isVesUser();
     }
 
     match /sharingRooms/{roomId} {
-      allow read: if isVerifiedVesUser();
-      allow create: if isVerifiedVesUser() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isVerifiedVesUser() && resource.data.ownerId == request.auth.uid;
-      allow delete: if isVerifiedVesUser() && resource.data.ownerId == request.auth.uid;
+      allow read: if isVesUser();
+      allow create: if isVesUser() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isVesUser() && resource.data.ownerId == request.auth.uid;
+      allow delete: if isVesUser() && resource.data.ownerId == request.auth.uid;
     }
   }
 }
