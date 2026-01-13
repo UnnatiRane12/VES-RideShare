@@ -1,7 +1,7 @@
 
 "use client";
 
-import { GoogleMap, useJsApiLoader, DirectionsRenderer } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { Card, CardContent } from "./ui/card";
@@ -35,10 +35,15 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
   });
 
   const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
+  const [originGeocoded, setOriginGeocoded] = useState<google.maps.LatLngLiteral | null>(null);
+  const [destinationGeocoded, setDestinationGeocoded] = useState<google.maps.LatLngLiteral | null>(null);
+
 
   useEffect(() => {
     if (isLoaded && origin && destination) {
       const directionsService = new window.google.maps.DirectionsService();
+      const geocoder = new window.google.maps.Geocoder();
+
       directionsService.route(
         {
           origin: origin,
@@ -48,8 +53,23 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
         (result, status) => {
           if (status === window.google.maps.DirectionsStatus.OK) {
             setDirectionsResponse(result);
+            if (result?.routes[0]?.legs[0]) {
+                setOriginGeocoded(result.routes[0].legs[0].start_location.toJSON());
+                setDestinationGeocoded(result.routes[0].legs[0].end_location.toJSON());
+            }
           } else {
             console.error(`error fetching directions ${result}`);
+            // Fallback to geocoder if directions fail for some reason
+            geocoder.geocode({ address: origin }, (results, status) => {
+                if (status === 'OK' && results) {
+                    setOriginGeocoded(results[0].geometry.location.toJSON());
+                }
+            });
+            geocoder.geocode({ address: destination }, (results, status) => {
+                if (status === 'OK' && results) {
+                    setDestinationGeocoded(results[0].geometry.location.toJSON());
+                }
+            });
           }
         }
       );
@@ -180,10 +200,13 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
                     strokeColor: 'hsl(var(--primary))',
                     strokeWeight: 5,
                     strokeOpacity: 0.8,
-                }
+                },
+                suppressMarkers: true, // We will use our own markers
             }}
         />
       )}
+      {originGeocoded && <Marker position={originGeocoded} title="Starting Point" />}
+      {destinationGeocoded && <Marker position={destinationGeocoded} title="Destination" />}
     </GoogleMap>
   ) : (
     <Skeleton className="h-[400px] w-full" />
