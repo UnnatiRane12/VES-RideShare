@@ -11,20 +11,7 @@ import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-type Room = {
-  id: string;
-  name: string;
-  ownerId: string;
-  ownerName: string;
-  ownerAvatarUrl?: string;
-  participantIds: string[];
-  startingPoint: string;
-  destination: string;
-  passengerLimit: number;
-  autoStatus: boolean;
-};
+import type { Room } from "@/lib/data";
 
 export default function FindRoomPage() {
   const firestore = useFirestore();

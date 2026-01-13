@@ -11,10 +11,12 @@ export type Room = {
   id: string;
   name: string;
   ownerId: string;
+  ownerName: string;
+  ownerAvatarUrl?: string;
   participantIds: string[];
-  startPoint: string;
+  startingPoint: string;
   destination: string;
-  capacity: number;
-  hasAuto: boolean;
-  expiresAt: Date;
+  passengerLimit: number;
+  autoStatus: boolean;
 };
+

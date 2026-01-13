@@ -2,25 +2,14 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { History, Lightbulb } from "lucide-react";
+import { History } from "lucide-react";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { RoomCard } from "@/components/room-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import type { Room } from "@/lib/data";
 
-type Room = {
-  id: string;
-  name: string;
-  ownerId: string;
-  ownerName: string;
-  ownerAvatarUrl?: string;
-  participantIds: string[];
-  startingPoint: string;
-  destination: string;
-  passengerLimit: number;
-  autoStatus: boolean;
-};
 
 export default function MyRidesPage() {
   const { user, isUserLoading } = useUser();

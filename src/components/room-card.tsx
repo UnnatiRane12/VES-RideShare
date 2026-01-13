@@ -8,19 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-type Room = {
-  id: string;
-  name: string;
-  ownerId: string;
-  ownerName: string;
-  ownerAvatarUrl?: string;
-  participantIds: string[];
-  startingPoint: string;
-  destination: string;
-  passengerLimit: number;
-  autoStatus: boolean;
-};
+import type { Room } from "@/lib/data";
 
 interface RoomCardProps {
   room: Room;
