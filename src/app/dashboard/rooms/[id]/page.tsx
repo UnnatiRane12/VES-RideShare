@@ -41,6 +41,7 @@ type UserProfile = {
 
 function RiderAvatar({ userId, isOwner }: { userId: string, isOwner: boolean }) {
     const firestore = useFirestore();
+    const { user } = useUser();
     const userDocRef = useMemoFirebase(() => {
         if (!firestore || !userId) return null;
         return doc(firestore, 'users', userId);
@@ -249,3 +250,5 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
+
+    
