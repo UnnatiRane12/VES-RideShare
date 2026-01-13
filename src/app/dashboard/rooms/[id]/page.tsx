@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import {
@@ -43,15 +43,16 @@ function RiderAvatar({ userId }: { userId: string }) {
   );
 }
 
-export default function RoomDetailsPage({ params }: { params: { id: string } }) {
+export default function RoomDetailsPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const { id } = React.use(params);
+  const params = useParams();
+  const id = params.id as string;
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
-    return doc(firestore, 'sharingRooms', id as string);
+    return doc(firestore, 'sharingRooms', id);
   }, [firestore, id]);
   
   const { data: room, isLoading } = useDoc<Room>(roomDocRef);
