@@ -2,12 +2,11 @@
 'use client';
 
 import { RoomCard } from "@/components/room-card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lightbulb, Search, Sparkles } from "lucide-react";
+import { Lightbulb, Search } from "lucide-react";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { useState } from "react";
@@ -92,14 +91,6 @@ export default function FindRoomPage() {
                 </form>
             </CardContent>
             </Card>
-            
-            <Alert className="bg-primary/5 border-primary/20">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <AlertTitle className="font-bold text-primary">Smart Suggestions</AlertTitle>
-            <AlertDescription>
-                Can't find a ride? Our AI can help you find rides to nearby destinations or suggest common routes. Try searching to see suggestions!
-            </AlertDescription>
-            </Alert>
         </div>
       </div>
       <div className="lg:col-span-3">

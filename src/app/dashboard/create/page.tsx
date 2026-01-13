@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Car, Info, Sparkles } from "lucide-react";
+import { ArrowLeft, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,6 @@ import { useFirestore, useUser } from "@/firebase";
 import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   name: z.string().min(3, "Room name must be at least 3 characters."),
@@ -63,18 +62,16 @@ export default function CreateRoomPage() {
     }
 
     try {
-      // Generate a new document reference with a unique ID
-      const newRoomRef = doc(collection(firestore, "sharingRooms"));
-      
-      await setDoc(newRoomRef, {
+      const newRoomData = {
         ...data,
         ownerId: user.uid,
         ownerName: user.displayName,
         ownerAvatarUrl: user.photoURL || null,
-        participantIds: [user.uid], // Owner is a participant by default
+        participantIds: [user.uid],
         createdAt: serverTimestamp(),
-      });
-
+      };
+      
+      await addDoc(collection(firestore, "sharingRooms"), newRoomData);
 
       toast({
         title: "Room Created!",
@@ -266,13 +263,6 @@ export default function CreateRoomPage() {
                 <p>3. <span className="font-semibold">Ride Together:</span> Once your room is full, you can coordinate with your fellow riders and share the journey!</p>
             </CardContent>
         </Card>
-         <Alert>
-            <Sparkles className="h-4 w-4" />
-            <AlertTitle>Did you know?</AlertTitle>
-            <AlertDescription>
-            You can use our AI-powered Smart Suggestions on the "Find a Ride" page to discover common routes and nearby destinations.
-            </AlertDescription>
-        </Alert>
       </div>
     </div>
   );
