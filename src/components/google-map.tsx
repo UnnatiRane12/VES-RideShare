@@ -1,7 +1,7 @@
 
 "use client";
 
-import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { Card, CardContent } from "./ui/card";
@@ -24,6 +24,7 @@ const center = {
 
 export function GoogleMapComponent({ origin, destination }: MapProps) {
   const [isClient, setIsClient] = useState(false);
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -34,33 +35,23 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
-  const [originGeocoded, setOriginGeocoded] = useState<google.maps.LatLngLiteral | null>(null);
-  const [destinationGeocoded, setDestinationGeocoded] = useState<google.maps.LatLngLiteral | null>(null);
-
-
   useEffect(() => {
-    if (isLoaded && (origin || destination)) {
-      const geocoder = new window.google.maps.Geocoder();
-      
-      if (origin) {
-        geocoder.geocode({ address: origin }, (results, status) => {
-            if (status === 'OK' && results && results[0]) {
-                setOriginGeocoded(results[0].geometry.location.toJSON());
-            } else {
-              console.error(`Geocode was not successful for the following reason: ${status}`);
-            }
-        });
-      }
-      
-      if (destination) {
-        geocoder.geocode({ address: destination }, (results, status) => {
-            if (status === 'OK' && results && results[0]) {
-                setDestinationGeocoded(results[0].geometry.location.toJSON());
-            } else {
-              console.error(`Geocode was not successful for the following reason: ${status}`);
-            }
-        });
-      }
+    if (isLoaded && origin && destination) {
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route(
+        {
+          origin: origin,
+          destination: destination,
+          travelMode: window.google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === window.google.maps.DirectionsStatus.OK) {
+            setDirections(result);
+          } else {
+            console.error(`Directions request failed due to ${status}`);
+          }
+        }
+      );
     }
   }, [isLoaded, origin, destination]);
   
@@ -93,7 +84,7 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      center={originGeocoded || destinationGeocoded || center}
+      center={center}
       zoom={12}
       options={{
         disableDefaultUI: true,
@@ -179,9 +170,36 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
             },
         ],
       }}
+      onLoad={(map) => {
+        if (directions) {
+          map.fitBounds(directions.routes[0].bounds);
+        }
+      }}
     >
-      {originGeocoded && <Marker position={originGeocoded} title="Starting Point" />}
-      {destinationGeocoded && <Marker position={destinationGeocoded} title="Destination" />}
+      {directions && (
+        <DirectionsRenderer
+          directions={directions}
+          options={{
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: "#10B981",
+              strokeWeight: 5,
+            },
+          }}
+        />
+      )}
+      {directions?.routes[0]?.legs[0]?.start_location && (
+        <Marker
+          position={directions.routes[0].legs[0].start_location}
+          title="Starting Point"
+        />
+      )}
+      {directions?.routes[0]?.legs[0]?.end_location && (
+        <Marker
+          position={directions.routes[0].legs[0].end_location}
+          title="Destination"
+        />
+      )}
     </GoogleMap>
   ) : (
     <Skeleton className="h-[400px] w-full" />
