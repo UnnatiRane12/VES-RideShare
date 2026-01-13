@@ -92,7 +92,7 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const { id } = params;
+  const { id } = React.use(params);
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
