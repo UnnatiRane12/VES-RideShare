@@ -1,7 +1,7 @@
 
 "use client";
 
-import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { Card, CardContent } from "./ui/card";
@@ -34,45 +34,33 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
-  const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
   const [originGeocoded, setOriginGeocoded] = useState<google.maps.LatLngLiteral | null>(null);
   const [destinationGeocoded, setDestinationGeocoded] = useState<google.maps.LatLngLiteral | null>(null);
 
 
   useEffect(() => {
-    if (isLoaded && origin && destination) {
-      const directionsService = new window.google.maps.DirectionsService();
+    if (isLoaded && (origin || destination)) {
       const geocoder = new window.google.maps.Geocoder();
-
-      directionsService.route(
-        {
-          origin: origin,
-          destination: destination,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (result, status) => {
-          if (status === window.google.maps.DirectionsStatus.OK) {
-            setDirectionsResponse(result);
-            if (result?.routes[0]?.legs[0]) {
-                setOriginGeocoded(result.routes[0].legs[0].start_location.toJSON());
-                setDestinationGeocoded(result.routes[0].legs[0].end_location.toJSON());
+      
+      if (origin) {
+        geocoder.geocode({ address: origin }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+                setOriginGeocoded(results[0].geometry.location.toJSON());
+            } else {
+              console.error(`Geocode was not successful for the following reason: ${status}`);
             }
-          } else {
-            console.error(`error fetching directions ${result}`);
-            // Fallback to geocoder if directions fail for some reason
-            geocoder.geocode({ address: origin }, (results, status) => {
-                if (status === 'OK' && results) {
-                    setOriginGeocoded(results[0].geometry.location.toJSON());
-                }
-            });
-            geocoder.geocode({ address: destination }, (results, status) => {
-                if (status === 'OK' && results) {
-                    setDestinationGeocoded(results[0].geometry.location.toJSON());
-                }
-            });
-          }
-        }
-      );
+        });
+      }
+      
+      if (destination) {
+        geocoder.geocode({ address: destination }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+                setDestinationGeocoded(results[0].geometry.location.toJSON());
+            } else {
+              console.error(`Geocode was not successful for the following reason: ${status}`);
+            }
+        });
+      }
     }
   }, [isLoaded, origin, destination]);
   
@@ -105,8 +93,8 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      center={center}
-      zoom={10}
+      center={originGeocoded || destinationGeocoded || center}
+      zoom={12}
       options={{
         disableDefaultUI: true,
         zoomControl: true,
@@ -192,19 +180,6 @@ export function GoogleMapComponent({ origin, destination }: MapProps) {
         ],
       }}
     >
-      {directionsResponse && (
-        <DirectionsRenderer 
-            directions={directionsResponse}
-            options={{
-                polylineOptions: {
-                    strokeColor: 'hsl(var(--primary))',
-                    strokeWeight: 5,
-                    strokeOpacity: 0.8,
-                },
-                suppressMarkers: true, // We will use our own markers
-            }}
-        />
-      )}
       {originGeocoded && <Marker position={originGeocoded} title="Starting Point" />}
       {destinationGeocoded && <Marker position={destinationGeocoded} title="Destination" />}
     </GoogleMap>
