@@ -30,6 +30,7 @@ type UserProfile = {
 function RiderAvatar({ userId, isOwner }: { userId: string, isOwner: boolean }) {
     const firestore = useFirestore();
     const { user } = useUser();
+
     const userDocRef = useMemoFirebase(() => {
         if (!firestore || !userId) return null;
         return doc(firestore, 'users', userId);
@@ -92,7 +93,8 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const { id } = React.use(params);
+  const resolvedParams = React.use(params);
+  const id = resolvedParams.id;
   
   const roomDocRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -238,3 +240,5 @@ export default function RoomDetailsPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
+
+    
