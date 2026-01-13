@@ -2,7 +2,6 @@
 'use client';
 
 import { ArrowRight, Car, MapPin, Users } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,20 +12,6 @@ import { RoomDetailsModal } from "./room-details-modal";
 
 interface RoomCardProps {
   room: Room;
-}
-
-function RoomOwner({ ownerName, ownerAvatarUrl }: { ownerName: string; ownerAvatarUrl?: string }) {
-  const fallback = ownerName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-
-  return (
-    <div className="flex items-center gap-2">
-      <Avatar className="h-6 w-6">
-         <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
-        <AvatarFallback>{fallback}</AvatarFallback>
-      </Avatar>
-      <span className="font-medium text-sm text-foreground">{ownerName}</span>
-    </div>
-  );
 }
 
 export function RoomCard({ room }: RoomCardProps) {
@@ -60,12 +45,11 @@ export function RoomCard({ room }: RoomCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-start text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="font-medium">{`${totalParticipants} / ${room.passengerLimit} Riders`}</span>
           </div>
-          <RoomOwner ownerName={room.ownerName} ownerAvatarUrl={room.ownerAvatarUrl} />
         </div>
       </CardContent>
        <CardFooter className="pt-4">

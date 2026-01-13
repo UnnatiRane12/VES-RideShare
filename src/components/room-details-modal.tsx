@@ -134,15 +134,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                 <CardContent className="p-6 pt-4 space-y-8">
                     <GoogleMapComponent origin={room.startingPoint} destination={room.destination} />
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                        <Card className="bg-card/50">
-                            <CardHeader>
-                               <CardTitle className="flex items-center justify-center gap-2"><User className="text-primary"/>Owner</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-lg font-semibold">{room.ownerName}</p>
-                            </CardContent>
-                        </Card>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
                          <Card className="bg-card/50">
                             <CardHeader>
                                <CardTitle className="flex items-center justify-center gap-2"><Users className="text-primary"/>Capacity</CardTitle>
