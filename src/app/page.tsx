@@ -137,11 +137,11 @@ export default function AuthPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="mx-auto w-full max-w-sm shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
+      <Card className="mx-auto w-full max-w-sm shadow-2xl bg-card/80 backdrop-blur-sm border-primary/20">
         <CardHeader>
           <div className="flex justify-center mb-4">
-            <div className="bg-primary text-primary-foreground p-3 rounded-full">
+            <div className="bg-primary text-primary-foreground p-3 rounded-full shadow-lg">
               <Car className="h-8 w-8" />
             </div>
           </div>
@@ -206,14 +206,14 @@ export default function AuthPage() {
               />
             </div>
             
-            <Button className="w-full" onClick={handleAuthAction}>
+            <Button className="w-full bg-gradient-to-r from-primary to-teal-400 text-primary-foreground hover:scale-105 transition-transform" onClick={handleAuthAction}>
               {isLogin ? "Login" : "Create Account"}
             </Button>
             
           </div>
           <div className="mt-4 text-center text-sm">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <Button variant="link" className="p-0 h-auto font-semibold" onClick={() => setIsLogin(!isLogin)}>
+            <Button variant="link" className="p-0 h-auto font-semibold text-teal-400" onClick={() => setIsLogin(!isLogin)}>
               {isLogin ? "Sign Up" : "Login"}
             </Button>
           </div>

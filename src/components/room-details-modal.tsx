@@ -4,7 +4,7 @@
 import React from 'react';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { CardContent } from '@/components/ui/card';
+import { CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -42,6 +42,7 @@ function RiderAvatar({ userId }: { userId: string }) {
     </div>
   );
 }
+
 
 interface RoomDetailsModalProps {
     room: Room;
@@ -101,12 +102,12 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
         <DialogContent className="max-w-lg p-0">
             <DialogHeader className="p-6 pb-4">
                 <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <DialogTitle>{room.name}</DialogTitle>
-                         <DialogDescription className="mt-1">
-                            A ride from {room.startingPoint} to {room.destination}.
-                        </DialogDescription>
-                    </div>
+                    <DialogTitle>
+                       {room.name}
+                      <DialogDescription className="mt-1">
+                          A ride from {room.startingPoint} to {room.destination}.
+                      </DialogDescription>
+                    </DialogTitle>
                     {room.autoStatus && (
                         <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0 text-sm px-3 py-1 mt-1">
                             <Car className="mr-2 h-4 w-4" /> Ready
@@ -157,7 +158,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                 </div>
             </CardContent>
             
-            <div className="p-6 bg-card/50 border-t">
+            <CardFooter className="p-6 bg-card/50 border-t">
               {user && (
                   <Button className="w-full text-lg py-6" onClick={handleJoinLeaveRoom} disabled={!user || (isRoomFull && !isUserParticipant)}>
                       {isUserParticipant ? <><LogOut className="mr-2"/>Leave Room</> : <><LogIn className="mr-2"/>Join Room</>}
@@ -168,7 +169,7 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                       Login to Join Room
                   </Button>
               )}
-            </div>
+            </CardFooter>
         </DialogContent>
      </Dialog>
   );

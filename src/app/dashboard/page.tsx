@@ -59,8 +59,8 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Link href="/dashboard/create">
-          <Card className="h-full transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
+        <Card className="h-full bg-card/70 backdrop-blur-sm border-primary/20 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/10">
+            <Link href="/dashboard/create" className="block h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Create a Ride</CardTitle>
               <MapPinPlus className="h-8 w-8 text-primary" />
@@ -70,24 +70,25 @@ export default function Dashboard() {
                 Have a ride to share? Create a room and let others join you. Set your destination and find fellow travellers.
               </CardDescription>
             </CardContent>
-          </Card>
-        </Link>
-        <Link href="/dashboard/find">
-          <Card className="h-full transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
+            </Link>
+        </Card>
+        
+        <Card className="h-full bg-card/70 backdrop-blur-sm border-teal-400/20 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-teal-400/10">
+            <Link href="/dashboard/find" className="block h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-2xl font-bold">Find a Ride</CardTitle>
-              <Search className="h-8 w-8 text-primary" />
+              <Search className="h-8 w-8 text-teal-400" />
             </CardHeader>
             <CardContent>
               <CardDescription>
                 Looking for a ride? Search for available rooms heading to your destination or nearby locations.
               </CardDescription>
             </CardContent>
-          </Card>
-        </Link>
+            </Link>
+        </Card>
       </div>
 
-      <Card>
+      <Card className="bg-card/70 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Why Share Your Ride?</CardTitle>
           <CardDescription>Discover the benefits of carpooling with VES RideShare.</CardDescription>

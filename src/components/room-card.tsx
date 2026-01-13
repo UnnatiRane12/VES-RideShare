@@ -20,7 +20,7 @@ export function RoomCard({ room }: RoomCardProps) {
 
   return (
     <>
-    <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card/70 backdrop-blur-sm border-primary/20">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <CardTitle className="text-lg font-bold">{room.name}</CardTitle>
@@ -52,7 +52,7 @@ export function RoomCard({ room }: RoomCardProps) {
           </div>
         </div>
       </CardContent>
-       <CardFooter className="pt-4">
+       <CardFooter className="pt-4 mt-auto">
         <Button onClick={() => setIsModalOpen(true)} className="w-full bg-gradient-to-r from-primary/90 to-teal-400/90 text-primary-foreground hover:scale-105 transition-transform">
             View Details <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
