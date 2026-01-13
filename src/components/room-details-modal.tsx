@@ -19,7 +19,9 @@ import { Car, MapPin, Users, User, LogIn, LogOut } from 'lucide-react';
 import type { Room } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { GoogleMapComponent } from '@/components/google-map';
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+
 
 function RiderAvatar({ userId }: { userId: string }) {
   const firestore = useFirestore();
@@ -112,11 +114,15 @@ export function RoomDetailsModal({ room: initialRoom, onClose }: RoomDetailsModa
                  <DialogHeader className="p-6 pb-0">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div>
-                            <CardTitle className="text-3xl font-bold tracking-tight mb-2">{room.name}</CardTitle>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <MapPin className="h-5 w-5" />
-                                <span className="font-medium">{room.startingPoint} to {room.destination}</span>
-                            </div>
+                            <DialogTitle asChild>
+                                <CardTitle className="text-3xl font-bold tracking-tight mb-2">{room.name}</CardTitle>
+                            </DialogTitle>
+                            <DialogDescription asChild>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <MapPin className="h-5 w-5" />
+                                    <span className="font-medium">{room.startingPoint} to {room.destination}</span>
+                                </div>
+                            </DialogDescription>
                         </div>
                         {room.autoStatus && (
                             <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 shrink-0 text-base px-4 py-2">
